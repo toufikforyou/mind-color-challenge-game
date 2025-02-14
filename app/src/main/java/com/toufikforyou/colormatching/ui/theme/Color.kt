@@ -1,4 +1,4 @@
-package com.toufikforyou.colormatching.main.presentation.ui.theme
+package com.toufikforyou.colormatching.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
