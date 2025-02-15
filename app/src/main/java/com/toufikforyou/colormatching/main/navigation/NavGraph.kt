@@ -10,6 +10,7 @@ import com.toufikforyou.colormatching.main.presentation.components.guide.GuideSc
 import com.toufikforyou.colormatching.main.presentation.components.highscores.HighScoresScreen
 import com.toufikforyou.colormatching.main.presentation.screens.home.HomeScreen
 import com.toufikforyou.colormatching.main.presentation.components.levelselection.LevelSelectionScreen
+import com.toufikforyou.colormatching.main.presentation.screens.game.HardGameScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -30,6 +31,10 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.Game.Medium.route) {
             MediumGameScreen(navController)
+        }
+
+        composable(Screen.Game.Hard.route) {
+            HardGameScreen(navController)
         }
 
         composable(Screen.Guide.route) {
