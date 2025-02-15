@@ -232,7 +232,7 @@ fun EasyGameScreen(
             TopAppBar(title = {
                 Text(
                     "Easy Level ${gameState.currentLevel}",
-                    style = MaterialTheme.typography.headlineMedium.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )

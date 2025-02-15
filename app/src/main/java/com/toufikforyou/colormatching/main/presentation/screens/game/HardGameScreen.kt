@@ -249,7 +249,7 @@ fun HardGameScreen(navController: NavController, soundManager: SoundManager, isS
             TopAppBar(title = {
                 Text(
                     "Hard Level ${gameState.currentLevel}",
-                    style = MaterialTheme.typography.headlineMedium.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )

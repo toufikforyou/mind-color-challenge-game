@@ -236,7 +236,7 @@ fun MediumGameScreen(navController: NavController, soundManager: SoundManager, i
             TopAppBar(title = {
                 Text(
                     "Medium Level ${gameState.currentLevel}",
-                    style = MaterialTheme.typography.headlineMedium.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
