@@ -9,12 +9,17 @@ fun generateColorPairs(gridSize: Int): List<ColorBox> {
     val pairs = (totalBoxes - 1) / 2
     val colors = generateRandomColors(pairs)
     val allColors = (colors + colors).shuffled()
-    
+
+    // Randomly select which position to ignore
+    val ignoredPosition = Random.nextInt(totalBoxes)
+
     return List(totalBoxes) { index ->
-        if (index < allColors.size) {
-            ColorBox(color = allColors[index])
+        if (index == ignoredPosition) {
+            ColorBox(color = Color.Gray) // Randomly ignored box
         } else {
-            ColorBox(color = Color.Gray) // Center box in odd-sized grids
+            // Calculate the correct color index accounting for the ignored position
+            val colorIndex = if (index < ignoredPosition) index else index - 1
+            ColorBox(color = allColors[colorIndex])
         }
     }
 }
