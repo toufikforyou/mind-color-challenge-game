@@ -1,10 +1,8 @@
 package com.toufikforyou.colormatching.main.presentation.screens.game
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,26 +58,25 @@ import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EasyGameScreen(navController: NavController) {
-    // Calculate initial time limit based on level ranges
+fun MediumGameScreen(navController: NavController) {
+    // Calculate initial time limit based on level ranges for medium difficulty
     fun calculateTimeLimit(level: Int) = when {
-        level < 10 -> 20  // Level 1-9: 20 seconds
-        level < 20 -> 18  // Level 10-19: 18 seconds
-        level < 30 -> 16  // Level 20-29: 16 seconds
-        level < 40 -> 14  // Level 30-39: 14 seconds
-        level < 50 -> 12  // Level 40-49: 12 seconds
-        level < 60 -> 10  // Level 50-59: 10 seconds
-        level < 70 -> 8   // Level 60-69: 8 seconds
-        level < 80 -> 6   // Level 70-79: 6 seconds
-        else -> 5        // Level 80+: 5 seconds
+        level < 10 -> 30  // Level 1-9: 30 seconds
+        level < 20 -> 27  // Level 10-19: 27 seconds
+        level < 30 -> 24  // Level 20-29: 24 seconds
+        level < 40 -> 21  // Level 30-39: 21 seconds
+        level < 50 -> 18  // Level 40-49: 18 seconds
+        level < 60 -> 15  // Level 50-59: 15 seconds
+        level < 70 -> 12  // Level 60-69: 12 seconds
+        level < 80 -> 10  // Level 70-79: 10 seconds
+        else -> 8         // Level 80+: 8 seconds
     }
 
     var gameState by remember {
         mutableStateOf(
             GameState(
-                gridSize = 3,
-                timeLimit = calculateTimeLimit(1),
-                isGameStarted = false
+                gridSize = 4, // 4x4 grid for medium difficulty
+                timeLimit = calculateTimeLimit(1), isGameStarted = false
             )
         )
     }
@@ -95,23 +92,21 @@ fun EasyGameScreen(navController: NavController) {
 
     var selectedBoxes = remember { mutableStateListOf<Int>() }
 
-    // Calculate total pairs for current grid size
+    // Calculate total pairs for 4x4 grid
     val totalPairs = remember(gameState.gridSize) {
-        (gameState.gridSize * gameState.gridSize) / 2
+        (gameState.gridSize * gameState.gridSize) / 2  // 8 pairs for 4x4
     }
 
-    // Handle box selection function
+    // Bonus points for quick matches
+    var lastMatchTime by remember { mutableStateOf(0L) }
+
+    // Handle box selection function with combo bonus
     val handleBoxSelection = { index: Int ->
         if (!mutableColorBoxes[index].isMatched && !selectedBoxes.contains(index) && selectedBoxes.size < 2) {
-            // Update the selected state of the clicked box
             mutableColorBoxes = mutableColorBoxes.mapIndexed { i, box ->
-                if (i == index) {
-                    box.copy(isSelected = true)
-                } else {
-                    box
-                }
+                if (i == index) box.copy(isSelected = true) else box
             }
-            
+
             selectedBoxes.add(index)
 
             if (selectedBoxes.size == 2) {
@@ -119,53 +114,53 @@ fun EasyGameScreen(navController: NavController) {
                 val secondIndex = selectedBoxes[1]
 
                 if (mutableColorBoxes[firstIndex].color == mutableColorBoxes[secondIndex].color) {
-                    // Match found
                     scope.launch {
-                        delay(300) // Short delay before showing match
+                        delay(300)
                         mutableColorBoxes = mutableColorBoxes.mapIndexed { i, box ->
                             if (i == firstIndex || i == secondIndex) {
                                 box.copy(isMatched = true, isSelected = false)
-                            } else {
-                                box
-                            }
+                            } else box
                         }
 
+                        val currentTime = System.currentTimeMillis()
+                        val timeDiff = currentTime - lastMatchTime
+
+                        // Calculate bonus points based on quick matches
+                        val bonusPoints = when {
+                            timeDiff < 2000 -> 15 // Quick match bonus
+                            timeDiff < 3000 -> 10 // Medium speed bonus
+                            else -> 5            // Base points
+                        }
+
+                        lastMatchTime = currentTime
                         val newMatchedPairs = gameState.matchedPairs + 1
                         gameState = gameState.copy(
-                            matchedPairs = newMatchedPairs,
-                            score = gameState.score + 10
+                            matchedPairs = newMatchedPairs, score = gameState.score + bonusPoints
                         )
 
-                        // Clear selected boxes after match
                         selectedBoxes.clear()
 
-                        // Level up only if ALL pairs are matched
                         if (newMatchedPairs == totalPairs) {
                             val nextLevel = gameState.currentLevel + 1
-                            // Prepare next level
                             gameState = gameState.copy(
                                 currentLevel = nextLevel,
                                 timeLimit = calculateTimeLimit(nextLevel),
                                 matchedPairs = 0,
                                 isGameStarted = false
                             )
-                            
-                            // Reset game state for new level
+
                             timeLeft = gameState.timeLimit
                             mutableColorBoxes = generateColorPairs(gameState.gridSize)
                             showInitialColors = true
                         }
                     }
                 } else {
-                    // No match - hide cards after delay
                     scope.launch {
                         delay(500)
                         mutableColorBoxes = mutableColorBoxes.mapIndexed { i, box ->
                             if (i == firstIndex || i == secondIndex) {
                                 box.copy(isSelected = false)
-                            } else {
-                                box
-                            }
+                            } else box
                         }
                         selectedBoxes.clear()
                     }
@@ -199,16 +194,13 @@ fun EasyGameScreen(navController: NavController) {
     }
 
     if (showGameOverDialog) {
-        GameOverDialog(
-            score = gameState.score,
+        GameOverDialog(score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             onTryAgain = {
                 showGameOverDialog = false
                 gameState = GameState(
-                    gridSize = 3,
-                    timeLimit = calculateTimeLimit(1),
-                    isGameStarted = false
+                    gridSize = 4, timeLimit = calculateTimeLimit(1), isGameStarted = false
                 )
                 timeLeft = gameState.timeLimit
                 mutableColorBoxes = generateColorPairs(gameState.gridSize)
@@ -217,8 +209,7 @@ fun EasyGameScreen(navController: NavController) {
             },
             onBack = {
                 navController.navigateUp()
-            }
-        )
+            })
     }
 
     Box(
@@ -236,34 +227,28 @@ fun EasyGameScreen(navController: NavController) {
         // Background particles effect
         GameBackground()
 
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "Easy Level ${gameState.currentLevel}",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                "Back",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
+        Scaffold(containerColor = Color.Transparent, topBar = {
+            TopAppBar(title = {
+                Text(
+                    "Medium Level ${gameState.currentLevel}",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
                     )
                 )
-            }
-        ) { padding ->
+            }, navigationIcon = {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        "Back",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent
+            )
+            )
+        }) { padding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -282,17 +267,15 @@ fun EasyGameScreen(navController: NavController) {
                     AnimatedGameStatCard("Level", gameState.currentLevel.toString())
                 }
 
-                // Color grid
-                ColorGrid(
-                    gridSize = gameState.gridSize,
+                // Color grid with smaller padding for 4x4
+                ColorGrid(gridSize = gameState.gridSize,
                     colorBoxes = mutableColorBoxes,
                     showInitialColors = showInitialColors,
                     onBoxClick = { index ->
                         if (!showInitialColors && gameState.isGameStarted && !mutableColorBoxes[index].isMatched) {
                             handleBoxSelection(index)
                         }
-                    }
-                )
+                    })
 
                 if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
                     Button(
@@ -379,34 +362,4 @@ private fun AnimatedGameStatCard(title: String, value: String) {
             )
         }
     }
-}
-
-@Composable
-private fun TimerDisplay(timeLeft: Int) {
-    val isLowTime = timeLeft <= 5
-    val color by animateColorAsState(
-        targetValue = if (isLowTime) Color.Red else MaterialTheme.colorScheme.primary,
-        animationSpec = tween(500)
-    )
-
-    var scale by remember { mutableStateOf(1f) }
-    val animatedScale by animateFloatAsState(
-        targetValue = scale, animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow
-        )
-    )
-
-    LaunchedEffect(timeLeft) {
-        if (isLowTime) {
-            scale = 1.2f
-            delay(100)
-            scale = 1f
-        }
-    }
-
-    Text(
-        text = timeLeft.toString(), style = MaterialTheme.typography.headlineMedium.copy(
-            color = color, fontWeight = FontWeight.Bold
-        ), modifier = Modifier.scale(animatedScale)
-    )
 } 

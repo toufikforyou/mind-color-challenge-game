@@ -5,6 +5,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.toufikforyou.colormatching.main.presentation.screens.game.EasyGameScreen
+import com.toufikforyou.colormatching.main.presentation.screens.game.MediumGameScreen
 import com.toufikforyou.colormatching.main.presentation.components.guide.GuideScreen
 import com.toufikforyou.colormatching.main.presentation.components.highscores.HighScoresScreen
 import com.toufikforyou.colormatching.main.presentation.screens.home.HomeScreen
@@ -25,6 +26,10 @@ fun NavGraph(navController: NavHostController) {
 
         composable(Screen.Game.Easy.route) {
             EasyGameScreen(navController)
+        }
+
+        composable(Screen.Game.Medium.route) {
+            MediumGameScreen(navController)
         }
 
         composable(Screen.Guide.route) {
