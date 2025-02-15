@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,23 +64,21 @@ import kotlin.random.Random
 fun EasyGameScreen(navController: NavController) {
     // Calculate initial time limit based on level ranges
     fun calculateTimeLimit(level: Int) = when {
-        level < 10 -> 20  // Level 1-9: 20 seconds
-        level < 20 -> 18  // Level 10-19: 18 seconds
-        level < 30 -> 16  // Level 20-29: 16 seconds
-        level < 40 -> 14  // Level 30-39: 14 seconds
-        level < 50 -> 12  // Level 40-49: 12 seconds
-        level < 60 -> 10  // Level 50-59: 10 seconds
-        level < 70 -> 8   // Level 60-69: 8 seconds
-        level < 80 -> 6   // Level 70-79: 6 seconds
-        else -> 5        // Level 80+: 5 seconds
+        level < 10 -> 20  // Level 1-9: 30 seconds
+        level < 20 -> 18  // Level 10-19: 25 seconds
+        level < 30 -> 16  // Level 20-29: 20 seconds
+        level < 40 -> 14  // Level 30-39: 18 seconds
+        level < 50 -> 12  // Level 40-49: 15 seconds
+        level < 60 -> 10  // Level 50-59: 12 seconds
+        level < 70 -> 8   // Level 60-69: 10 seconds
+        level < 80 -> 6   // Level 70-79: 8 seconds
+        else -> 4         // Level 80+: 6 seconds
     }
 
     var gameState by remember {
         mutableStateOf(
             GameState(
-                gridSize = 3,
-                timeLimit = calculateTimeLimit(1),
-                isGameStarted = false
+                gridSize = 3, timeLimit = calculateTimeLimit(1), isGameStarted = false
             )
         )
     }
@@ -93,7 +92,7 @@ fun EasyGameScreen(navController: NavController) {
         mutableStateOf(generateColorPairs(gameState.gridSize))
     }
 
-    var selectedBoxes = remember { mutableStateListOf<Int>() }
+    val selectedBoxes = remember { mutableStateListOf<Int>() }
 
     // Calculate total pairs for current grid size
     val totalPairs = remember(gameState.gridSize) {
@@ -111,7 +110,7 @@ fun EasyGameScreen(navController: NavController) {
                     box
                 }
             }
-            
+
             selectedBoxes.add(index)
 
             if (selectedBoxes.size == 2) {
@@ -132,8 +131,7 @@ fun EasyGameScreen(navController: NavController) {
 
                         val newMatchedPairs = gameState.matchedPairs + 1
                         gameState = gameState.copy(
-                            matchedPairs = newMatchedPairs,
-                            score = gameState.score + 10
+                            matchedPairs = newMatchedPairs, score = gameState.score + 10
                         )
 
                         // Clear selected boxes after match
@@ -149,7 +147,7 @@ fun EasyGameScreen(navController: NavController) {
                                 matchedPairs = 0,
                                 isGameStarted = false
                             )
-                            
+
                             // Reset game state for new level
                             timeLeft = gameState.timeLimit
                             mutableColorBoxes = generateColorPairs(gameState.gridSize)
@@ -192,23 +190,20 @@ fun EasyGameScreen(navController: NavController) {
     // Initial color display timer
     LaunchedEffect(showInitialColors) {
         if (showInitialColors) {
-            delay(5000)
+            delay(3000) // 3 seconds for easy mode
             showInitialColors = false
             gameState = gameState.copy(isGameStarted = true)
         }
     }
 
     if (showGameOverDialog) {
-        GameOverDialog(
-            score = gameState.score,
+        GameOverDialog(score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             onTryAgain = {
                 showGameOverDialog = false
                 gameState = GameState(
-                    gridSize = 3,
-                    timeLimit = calculateTimeLimit(1),
-                    isGameStarted = false
+                    gridSize = 3, timeLimit = calculateTimeLimit(1), isGameStarted = false
                 )
                 timeLeft = gameState.timeLimit
                 mutableColorBoxes = generateColorPairs(gameState.gridSize)
@@ -217,8 +212,7 @@ fun EasyGameScreen(navController: NavController) {
             },
             onBack = {
                 navController.navigateUp()
-            }
-        )
+            })
     }
 
     Box(
@@ -236,34 +230,28 @@ fun EasyGameScreen(navController: NavController) {
         // Background particles effect
         GameBackground()
 
-        Scaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            "Easy Level ${gameState.currentLevel}",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontWeight = FontWeight.Bold
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(
-                                Icons.AutoMirrored.Filled.ArrowBack,
-                                "Back",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
+        Scaffold(containerColor = Color.Transparent, topBar = {
+            TopAppBar(title = {
+                Text(
+                    "Easy Level ${gameState.currentLevel}",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
                     )
                 )
-            }
-        ) { padding ->
+            }, navigationIcon = {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        "Back",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent
+            )
+            )
+        }) { padding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -277,22 +265,36 @@ fun EasyGameScreen(navController: NavController) {
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    AnimatedGameStatCard("Time", timeLeft.toString())
+                    Surface(
+                        modifier = Modifier.padding(8.dp),
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Time", style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            )
+                            TimerDisplay(timeLeft)
+                        }
+                    }
                     AnimatedGameStatCard("Score", gameState.score.toString())
                     AnimatedGameStatCard("Level", gameState.currentLevel.toString())
                 }
 
                 // Color grid
-                ColorGrid(
-                    gridSize = gameState.gridSize,
+                ColorGrid(gridSize = gameState.gridSize,
                     colorBoxes = mutableColorBoxes,
                     showInitialColors = showInitialColors,
                     onBoxClick = { index ->
                         if (!showInitialColors && gameState.isGameStarted && !mutableColorBoxes[index].isMatched) {
                             handleBoxSelection(index)
                         }
-                    }
-                )
+                    })
 
                 if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
                     Button(
@@ -304,8 +306,7 @@ fun EasyGameScreen(navController: NavController) {
                         )
                     ) {
                         Text(
-                            "Start Game",
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            "Start Game", style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold
                             )
                         )
@@ -323,7 +324,7 @@ private fun GameBackground() {
             .fillMaxSize()
             .blur(20.dp)
     ) {
-        repeat(20) { index ->
+        repeat(20) { _ /* index */ ->
             val offset = rememberFloatingParticle()
             val size = remember { Random.nextInt(8, 17).dp }
             val alpha = remember { Random.nextFloat() * (0.15f - 0.05f) + 0.05f }
@@ -344,7 +345,7 @@ private fun GameBackground() {
 
 @Composable
 private fun AnimatedGameStatCard(title: String, value: String) {
-    var scale by remember { mutableStateOf(1f) }
+    var scale by remember { mutableFloatStateOf(1f) }
     val animatedScale by animateFloatAsState(
         targetValue = scale, animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow
@@ -383,13 +384,13 @@ private fun AnimatedGameStatCard(title: String, value: String) {
 
 @Composable
 private fun TimerDisplay(timeLeft: Int) {
-    val isLowTime = timeLeft <= 5
+    val isLowTime = timeLeft <= 5  // Warning threshold for easy mode
     val color by animateColorAsState(
         targetValue = if (isLowTime) Color.Red else MaterialTheme.colorScheme.primary,
         animationSpec = tween(500)
     )
 
-    var scale by remember { mutableStateOf(1f) }
+    var scale by remember { mutableFloatStateOf(1f) }
     val animatedScale by animateFloatAsState(
         targetValue = scale, animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow

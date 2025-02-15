@@ -1,8 +1,10 @@
 package com.toufikforyou.colormatching.main.presentation.screens.game
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -63,15 +65,13 @@ import kotlin.random.Random
 fun HardGameScreen(navController: NavController) {
     // Calculate initial time limit based on level ranges for hard difficulty
     fun calculateTimeLimit(level: Int) = when {
-        level < 10 -> 120  // Level 1-9: 120 seconds
-        level < 20 -> 100  // Level 10-19: 100 seconds
-        level < 30 -> 90  // Level 20-29: 90 seconds
-        level < 40 -> 80  // Level 30-39: 80 seconds
-        level < 50 -> 70  // Level 40-49: 70 seconds
+        level < 10 -> 180 // Level 1-9: 180 seconds
+        level < 20 -> 150 // Level 10-19: 150 seconds
+        level < 30 -> 120 // Level 20-29: 120 seconds
+        level < 40 -> 100 // Level 30-39: 100 seconds
+        level < 50 -> 80  // Level 40-49: 80 seconds
         level < 60 -> 60  // Level 50-59: 60 seconds
-        level < 70 -> 50  // Level 60-69: 50 seconds
-        level < 80 -> 40  // Level 70-79: 40 seconds
-        else -> 30        // Level 80+: 30 seconds
+        else -> 50         // Level 80+: 20 seconds
     }
 
     var gameState by remember {
@@ -200,7 +200,7 @@ fun HardGameScreen(navController: NavController) {
     // Initial color display timer
     LaunchedEffect(showInitialColors) {
         if (showInitialColors) {
-            delay(5000)
+            delay(7000) // 7 seconds for hard mode
             showInitialColors = false
             gameState = gameState.copy(isGameStarted = true)
         }
@@ -277,7 +277,23 @@ fun HardGameScreen(navController: NavController) {
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    AnimatedGameStatCard("Time", timeLeft.toString())
+                    Surface(
+                        modifier = Modifier.padding(8.dp),
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Time", style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            )
+                            TimerDisplay(timeLeft)
+                        }
+                    }
                     AnimatedGameStatCard("Score", gameState.score.toString())
                     AnimatedGameStatCard("Streak", "$currentStreak\n(Max: $maxStreak)")
                 }
@@ -376,4 +392,34 @@ private fun AnimatedGameStatCard(title: String, value: String) {
             )
         }
     }
+}
+
+@Composable
+private fun TimerDisplay(timeLeft: Int) {
+    val isLowTime = timeLeft <= 20  // Warning threshold for hard mode
+    val color by animateColorAsState(
+        targetValue = if (isLowTime) Color.Red else MaterialTheme.colorScheme.primary,
+        animationSpec = tween(500)
+    )
+
+    var scale by remember { mutableFloatStateOf(1f) }
+    val animatedScale by animateFloatAsState(
+        targetValue = scale, animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow
+        )
+    )
+
+    LaunchedEffect(timeLeft) {
+        if (isLowTime) {
+            scale = 1.2f
+            delay(100)
+            scale = 1f
+        }
+    }
+
+    Text(
+        text = timeLeft.toString(), style = MaterialTheme.typography.headlineMedium.copy(
+            color = color, fontWeight = FontWeight.Bold
+        ), modifier = Modifier.scale(animatedScale)
+    )
 } 

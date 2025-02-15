@@ -1,8 +1,10 @@
 package com.toufikforyou.colormatching.main.presentation.screens.game
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,7 +33,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,15 +65,12 @@ import kotlin.random.Random
 fun MediumGameScreen(navController: NavController) {
     // Calculate initial time limit based on level ranges for medium difficulty
     fun calculateTimeLimit(level: Int) = when {
-        level < 10 -> 30  // Level 1-9: 30 seconds
-        level < 20 -> 27  // Level 10-19: 27 seconds
-        level < 30 -> 24  // Level 20-29: 24 seconds
-        level < 40 -> 21  // Level 30-39: 21 seconds
-        level < 50 -> 18  // Level 40-49: 18 seconds
-        level < 60 -> 15  // Level 50-59: 15 seconds
-        level < 70 -> 12  // Level 60-69: 12 seconds
-        level < 80 -> 10  // Level 70-79: 10 seconds
-        else -> 8         // Level 80+: 8 seconds
+        level < 10 -> 60  // Level 1-9: 60 seconds
+        level < 20 -> 50  // Level 10-19: 50 seconds
+        level < 30 -> 45  // Level 20-29: 45 seconds
+        level < 40 -> 40  // Level 30-39: 40 seconds
+        level < 50 -> 35  // Level 40-49: 35 seconds
+        else -> 30        // Level 50+: 30 seconds
     }
 
     var gameState by remember {
@@ -90,7 +91,7 @@ fun MediumGameScreen(navController: NavController) {
         mutableStateOf(generateColorPairs(gameState.gridSize))
     }
 
-    var selectedBoxes = remember { mutableStateListOf<Int>() }
+    val selectedBoxes = remember { mutableStateListOf<Int>() }
 
     // Calculate total pairs for 4x4 grid
     val totalPairs = remember(gameState.gridSize) {
@@ -98,7 +99,7 @@ fun MediumGameScreen(navController: NavController) {
     }
 
     // Bonus points for quick matches
-    var lastMatchTime by remember { mutableStateOf(0L) }
+    var lastMatchTime by remember { mutableLongStateOf(0L) }
 
     // Handle box selection function with combo bonus
     val handleBoxSelection = { index: Int ->
@@ -187,7 +188,7 @@ fun MediumGameScreen(navController: NavController) {
     // Initial color display timer
     LaunchedEffect(showInitialColors) {
         if (showInitialColors) {
-            delay(5000)
+            delay(5000) // 5 seconds for medium mode
             showInitialColors = false
             gameState = gameState.copy(isGameStarted = true)
         }
@@ -262,7 +263,23 @@ fun MediumGameScreen(navController: NavController) {
                         .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    AnimatedGameStatCard("Time", timeLeft.toString())
+                    Surface(
+                        modifier = Modifier.padding(8.dp),
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "Time", style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                            )
+                            TimerDisplay(timeLeft)
+                        }
+                    }
                     AnimatedGameStatCard("Score", gameState.score.toString())
                     AnimatedGameStatCard("Level", gameState.currentLevel.toString())
                 }
@@ -287,8 +304,7 @@ fun MediumGameScreen(navController: NavController) {
                         )
                     ) {
                         Text(
-                            "Start Game",
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            "Start Game", style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold
                             )
                         )
@@ -306,7 +322,7 @@ private fun GameBackground() {
             .fillMaxSize()
             .blur(20.dp)
     ) {
-        repeat(20) { index ->
+        repeat(20) { _ /* index */ ->
             val offset = rememberFloatingParticle()
             val size = remember { Random.nextInt(8, 17).dp }
             val alpha = remember { Random.nextFloat() * (0.15f - 0.05f) + 0.05f }
@@ -327,7 +343,7 @@ private fun GameBackground() {
 
 @Composable
 private fun AnimatedGameStatCard(title: String, value: String) {
-    var scale by remember { mutableStateOf(1f) }
+    var scale by remember { mutableFloatStateOf(1f) }
     val animatedScale by animateFloatAsState(
         targetValue = scale, animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow
@@ -362,4 +378,33 @@ private fun AnimatedGameStatCard(title: String, value: String) {
             )
         }
     }
+}
+
+@Composable
+private fun TimerDisplay(timeLeft: Int) {
+    val isLowTime = timeLeft <= 15  // Warning threshold for medium mode
+    val color by animateColorAsState(
+        targetValue = if (isLowTime) Color.Red else MaterialTheme.colorScheme.primary,
+        animationSpec = tween(500)
+    )
+    var scale by remember { mutableFloatStateOf(1f) }
+    val animatedScale by animateFloatAsState(
+        targetValue = scale, animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow
+        )
+    )
+
+    LaunchedEffect(timeLeft) {
+        if (isLowTime) {
+            scale = 1.2f
+            delay(100)
+            scale = 1f
+        }
+    }
+
+    Text(
+        text = timeLeft.toString(), style = MaterialTheme.typography.headlineMedium.copy(
+            color = color, fontWeight = FontWeight.Bold
+        ), modifier = Modifier.scale(animatedScale)
+    )
 } 
