@@ -9,7 +9,7 @@ import com.toufikforyou.colormatching.main.presentation.screens.game.MediumGameS
 import com.toufikforyou.colormatching.main.presentation.components.guide.GuideScreen
 import com.toufikforyou.colormatching.main.presentation.components.highscores.HighScoresScreen
 import com.toufikforyou.colormatching.main.presentation.screens.home.HomeScreen
-import com.toufikforyou.colormatching.main.presentation.components.levelselection.LevelSelectionScreen
+import com.toufikforyou.colormatching.main.presentation.screens.levelselection.LevelSelectionScreen
 import com.toufikforyou.colormatching.main.presentation.screens.game.HardGameScreen
 
 @Composable
