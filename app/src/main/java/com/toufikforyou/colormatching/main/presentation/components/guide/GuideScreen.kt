@@ -14,6 +14,7 @@ import androidx.navigation.NavController
 @Composable
 fun GuideScreen(navController: NavController) {
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Guide") },
@@ -23,7 +24,8 @@ fun GuideScreen(navController: NavController) {
                     }
                 }
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier

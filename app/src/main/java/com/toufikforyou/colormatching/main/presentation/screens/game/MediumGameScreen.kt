@@ -55,6 +55,7 @@ import com.toufikforyou.colormatching.main.domain.model.GameState
 import com.toufikforyou.colormatching.main.presentation.animation.rememberFloatingParticle
 import com.toufikforyou.colormatching.main.presentation.components.ColorGrid
 import com.toufikforyou.colormatching.main.presentation.components.GameOverDialog
+import com.toufikforyou.colormatching.main.utils.SoundManager
 import com.toufikforyou.colormatching.main.utils.generateColorPairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -62,7 +63,7 @@ import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MediumGameScreen(navController: NavController) {
+fun MediumGameScreen(navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean) {
     // Calculate initial time limit based on level ranges for medium difficulty
     fun calculateTimeLimit(level: Int) = when {
         level < 10 -> 60  // Level 1-9: 60 seconds
@@ -117,6 +118,7 @@ fun MediumGameScreen(navController: NavController) {
                 if (mutableColorBoxes[firstIndex].color == mutableColorBoxes[secondIndex].color) {
                     scope.launch {
                         delay(300)
+                        if (isSoundEnabled) soundManager.playMatchFound() // Play match sound
                         mutableColorBoxes = mutableColorBoxes.mapIndexed { i, box ->
                             if (i == firstIndex || i == secondIndex) {
                                 box.copy(isMatched = true, isSelected = false)
@@ -153,6 +155,8 @@ fun MediumGameScreen(navController: NavController) {
                             timeLeft = gameState.timeLimit
                             mutableColorBoxes = generateColorPairs(gameState.gridSize)
                             showInitialColors = true
+
+                            if (isSoundEnabled) soundManager.playLevelComplete() // Play level complete sound
                         }
                     }
                 } else {
@@ -219,7 +223,7 @@ fun MediumGameScreen(navController: NavController) {
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.58f),
                         MaterialTheme.colorScheme.surfaceVariant
                     )
                 )

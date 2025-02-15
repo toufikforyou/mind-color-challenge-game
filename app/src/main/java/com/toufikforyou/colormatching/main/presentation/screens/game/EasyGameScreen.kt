@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -42,26 +39,25 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.navigation.NavController
 import com.toufikforyou.colormatching.main.domain.model.GameState
-import com.toufikforyou.colormatching.main.presentation.animation.rememberFloatingParticle
 import com.toufikforyou.colormatching.main.presentation.components.ColorGrid
 import com.toufikforyou.colormatching.main.presentation.components.GameOverDialog
+import com.toufikforyou.colormatching.main.utils.SoundManager
 import com.toufikforyou.colormatching.main.utils.generateColorPairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EasyGameScreen(navController: NavController) {
+fun EasyGameScreen(
+    navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
+) {
     // Calculate initial time limit based on level ranges
     fun calculateTimeLimit(level: Int) = when {
         level < 10 -> 20  // Level 1-9: 30 seconds
@@ -121,6 +117,7 @@ fun EasyGameScreen(navController: NavController) {
                     // Match found
                     scope.launch {
                         delay(300) // Short delay before showing match
+                        if (isSoundEnabled) soundManager.playMatchFound()
                         mutableColorBoxes = mutableColorBoxes.mapIndexed { i, box ->
                             if (i == firstIndex || i == secondIndex) {
                                 box.copy(isMatched = true, isSelected = false)
@@ -139,6 +136,7 @@ fun EasyGameScreen(navController: NavController) {
 
                         // Level up only if ALL pairs are matched
                         if (newMatchedPairs == totalPairs) {
+                            if (isSoundEnabled) soundManager.playLevelComplete()
                             val nextLevel = gameState.currentLevel + 1
                             // Prepare next level
                             gameState = gameState.copy(
@@ -221,14 +219,14 @@ fun EasyGameScreen(navController: NavController) {
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                        MaterialTheme.colorScheme.background.copy(alpha = 0.58f),
                         MaterialTheme.colorScheme.surfaceVariant
                     )
                 )
             )
     ) {
         // Background particles effect
-        GameBackground()
+        com.toufikforyou.colormatching.main.presentation.components.GameBackground()
 
         Scaffold(containerColor = Color.Transparent, topBar = {
             TopAppBar(title = {
@@ -313,32 +311,6 @@ fun EasyGameScreen(navController: NavController) {
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun GameBackground() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .blur(20.dp)
-    ) {
-        repeat(20) { _ /* index */ ->
-            val offset = rememberFloatingParticle()
-            val size = remember { Random.nextInt(8, 17).dp }
-            val alpha = remember { Random.nextFloat() * (0.15f - 0.05f) + 0.05f }
-
-            Box(
-                modifier = Modifier
-                    .size(size)
-                    .offset(
-                        x = offset.x * 300.dp, y = offset.y * 500.dp
-                    )
-                    .background(
-                        MaterialTheme.colorScheme.tertiary.copy(alpha = alpha), shape = CircleShape
-                    )
-            )
         }
     }
 }

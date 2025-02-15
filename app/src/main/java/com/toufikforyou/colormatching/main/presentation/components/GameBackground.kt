@@ -36,7 +36,7 @@ fun GameBackground() {
                         y = offset.y * 500.dp
                     )
                     .background(
-                        MaterialTheme.colorScheme.tertiary.copy(alpha = alpha),
+                        MaterialTheme.colorScheme.secondary.copy(alpha = alpha),
                         shape = CircleShape
                     )
             )
