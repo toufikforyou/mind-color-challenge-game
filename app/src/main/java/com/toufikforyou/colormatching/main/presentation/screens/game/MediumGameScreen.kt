@@ -63,7 +63,11 @@ import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MediumGameScreen(navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean) {
+fun MediumGameScreen(
+    navController: NavController,
+    soundManager: SoundManager,
+    isSoundEnabled: Boolean
+) {
     // Calculate initial time limit based on level ranges for medium difficulty
     fun calculateTimeLimit(level: Int) = when {
         level < 10 -> 60  // Level 1-9: 60 seconds

@@ -3,12 +3,8 @@ package com.toufikforyou.colormatching
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.toufikforyou.colormatching.main.data.PreferencesDataStore
 import com.toufikforyou.colormatching.main.navigation.NavGraph
@@ -29,11 +25,11 @@ class MainActivity : ComponentActivity() {
 
             ColorMatchingTheme(darkTheme = isDarkMode) {
                 val navController = rememberNavController()
-                    NavGraph(
-                        navController = navController,
-                        preferencesDataStore = preferencesDataStore,
-                        soundManager = soundManager
-                    )
+                NavGraph(
+                    navController = navController,
+                    preferencesDataStore = preferencesDataStore,
+                    soundManager = soundManager
+                )
 
             }
         }

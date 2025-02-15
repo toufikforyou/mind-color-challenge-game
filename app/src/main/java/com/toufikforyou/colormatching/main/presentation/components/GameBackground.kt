@@ -32,12 +32,10 @@ fun GameBackground() {
                 modifier = Modifier
                     .size(size)
                     .offset(
-                        x = offset.x * 300.dp,
-                        y = offset.y * 500.dp
+                        x = offset.x * 300.dp, y = offset.y * 500.dp
                     )
                     .background(
-                        MaterialTheme.colorScheme.secondary.copy(alpha = alpha),
-                        shape = CircleShape
+                        MaterialTheme.colorScheme.secondary.copy(alpha = alpha), shape = CircleShape
                     )
             )
         }

@@ -8,8 +8,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.toufikforyou.colormatching.main.data.PreferencesDataStore
-import com.toufikforyou.colormatching.main.presentation.components.guide.GuideScreen
-import com.toufikforyou.colormatching.main.presentation.components.highscores.HighScoresScreen
+import com.toufikforyou.colormatching.main.presentation.screens.guide.GuideScreen
+import com.toufikforyou.colormatching.main.presentation.screens.highscores.HighScoresScreen
 import com.toufikforyou.colormatching.main.presentation.screens.game.EasyGameScreen
 import com.toufikforyou.colormatching.main.presentation.screens.game.HardGameScreen
 import com.toufikforyou.colormatching.main.presentation.screens.game.MediumGameScreen
