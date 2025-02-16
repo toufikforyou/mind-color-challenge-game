@@ -50,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import dev.toufikforyou.colormatching.BuildConfig
 import dev.toufikforyou.colormatching.main.navigation.Screen
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.utils.SoundManager
@@ -117,7 +118,7 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "v1.0.0",
+                    text = "v${BuildConfig.VERSION_NAME}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
