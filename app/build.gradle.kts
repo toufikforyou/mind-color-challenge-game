@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.toufikforyou.colormatching"
+    namespace = "dev.toufikforyou.colormatching"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.toufikforyou.colormatching"
+        applicationId = "dev.toufikforyou.colormatching"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
