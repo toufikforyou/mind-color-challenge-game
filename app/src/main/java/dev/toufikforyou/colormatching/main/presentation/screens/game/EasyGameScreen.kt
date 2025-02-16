@@ -7,7 +7,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -40,13 +39,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
+import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
 import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.main.utils.generateColorPairs
@@ -213,22 +212,10 @@ fun EasyGameScreen(
             })
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.58f),
-                        MaterialTheme.colorScheme.surfaceVariant
-                    )
-                )
-            )
-    ) {
-        // Background particles effect
-        dev.toufikforyou.colormatching.main.presentation.components.GameBackground()
-
-        Scaffold(containerColor = Color.Transparent, topBar = {
+    Scaffold(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background),
+        topBar = {
             TopAppBar(title = {
                 Text(
                     "Easy Level ${gameState.currentLevel}",
@@ -249,66 +236,70 @@ fun EasyGameScreen(
                 containerColor = Color.Transparent
             )
             )
-        }) { padding ->
-            Column(
+        }) { paddingValues ->
+        GameBackground()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Game stats
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Game stats
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                Surface(
+                    modifier = Modifier.padding(8.dp),
+                    color = MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Surface(
-                        modifier = Modifier.padding(8.dp),
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Time", style = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.secondary
-                                )
-                            )
-                            TimerDisplay(timeLeft)
-                        }
-                    }
-                    AnimatedGameStatCard("Score", gameState.score.toString())
-                    AnimatedGameStatCard("Level", gameState.currentLevel.toString())
-                }
-
-                // Color grid
-                ColorGrid(gridSize = gameState.gridSize,
-                    colorBoxes = mutableColorBoxes,
-                    showInitialColors = showInitialColors,
-                    onBoxClick = { index ->
-                        if (!showInitialColors && gameState.isGameStarted && !mutableColorBoxes[index].isMatched) {
-                            handleBoxSelection(index)
-                        }
-                    })
-
-                if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
-                    Button(
-                        onClick = { showInitialColors = true },
+                    Column(
                         modifier = Modifier.padding(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Start Game", style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Bold
+                            text = "Time", style = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.secondary
                             )
                         )
+                        TimerDisplay(timeLeft)
                     }
+                }
+                AnimatedGameStatCard("Score", gameState.score.toString())
+                AnimatedGameStatCard("Level", gameState.currentLevel.toString())
+            }
+
+            // Color grid
+            ColorGrid(gridSize = gameState.gridSize,
+                colorBoxes = mutableColorBoxes,
+                showInitialColors = showInitialColors,
+                onBoxClick = { index ->
+                    if (!showInitialColors && gameState.isGameStarted && !mutableColorBoxes[index].isMatched) {
+                        handleBoxSelection(index)
+                    }
+                })
+
+            if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
+                Button(
+                    onClick = { showInitialColors = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        text = "Start Game",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
                 }
             }
         }

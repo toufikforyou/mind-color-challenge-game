@@ -4,8 +4,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,68 +44,57 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LevelSelectionScreen(navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.58f),
-                        MaterialTheme.colorScheme.surfaceVariant
-                    )
+    Scaffold(modifier = Modifier
+        .fillMaxSize()
+        .background(
+            MaterialTheme.colorScheme.background
+        ), topBar = {
+        TopAppBar(title = {
+            Text(
+                "Select Difficulty", style = MaterialTheme.typography.titleLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
                 )
             )
-    ) {
-        // Animated background
-        GameBackground()
-
-        Scaffold(containerColor = Color.Transparent, topBar = {
-            TopAppBar(title = {
-                Text(
-                    "Select Difficulty", style = MaterialTheme.typography.titleLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
-                    )
+        }, navigationIcon = {
+            IconButton(onClick = { navController.navigateUp() }) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    "Back",
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
-            }, navigationIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        "Back",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent
-            )
-            )
-        }) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                DifficultyButton(text = "Easy",
-                    description = "3x3 Grid",
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    onClick = { navController.navigate(Screen.Game.Easy.route) })
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                DifficultyButton(text = "Medium",
-                    description = "4x4 Grid",
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    onClick = { navController.navigate(Screen.Game.Medium.route) })
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                DifficultyButton(text = "Hard",
-                    description = "5x5 Grid",
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    onClick = { navController.navigate(Screen.Game.Hard.route) })
             }
+        }, colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.Transparent
+        )
+        )
+    }) { paddingValues ->
+        GameBackground()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            DifficultyButton(text = "Easy",
+                description = "3x3 Grid",
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                onClick = { navController.navigate(Screen.Game.Easy.route) })
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            DifficultyButton(text = "Medium",
+                description = "4x4 Grid",
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                onClick = { navController.navigate(Screen.Game.Medium.route) })
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            DifficultyButton(text = "Hard",
+                description = "5x5 Grid",
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                onClick = { navController.navigate(Screen.Game.Hard.route) })
         }
     }
 }
@@ -124,6 +112,11 @@ private fun DifficultyButton(
 
     Surface(modifier = Modifier
         .width(280.dp)
+        .border(
+            width = 1.5.dp,
+            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.5f),
+            shape = RoundedCornerShape(24.dp)
+        )
         .scale(animatedScale),
         shape = RoundedCornerShape(24.dp),
         color = containerColor,

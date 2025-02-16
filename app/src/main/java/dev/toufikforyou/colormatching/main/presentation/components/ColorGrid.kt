@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,7 +15,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -46,12 +47,17 @@ fun ColorGrid(
             val box = colorBoxes[index]
             ColorBox(
                 color = if (showInitialColors || box.isSelected || box.isMatched) box.color
-                else MaterialTheme.colorScheme.surface,
+                else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.05f),
                 isMatched = box.isMatched,
                 onClick = { onBoxClick(index) },
                 modifier = Modifier
                     .aspectRatio(1f)
                     .animateContentSize()
+                    .border(
+                        width = 1.5.dp,
+                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(12.dp)
+                    )
             )
         }
     }
@@ -82,7 +88,9 @@ private fun ColorBox(
             .animateContentSize(),
         shape = RoundedCornerShape(12.dp),
         color = color,
-        border = if (isMatched) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        border = if (isMatched) BorderStroke(
+            2.dp, MaterialTheme.colorScheme.primaryContainer
+        ) else null,
         onClick = onClick
     ) {
         if (isMatched) {
@@ -90,9 +98,9 @@ private fun ColorBox(
                 modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.Check,
+                    Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
+                    tint = Color.White,
                     modifier = Modifier.scale(animatedScale)
                 )
             }

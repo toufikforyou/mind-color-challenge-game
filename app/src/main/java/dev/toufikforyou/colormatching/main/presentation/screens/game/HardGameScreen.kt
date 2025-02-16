@@ -7,15 +7,11 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -43,27 +39,25 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.navigation.NavController
 import dev.toufikforyou.colormatching.main.domain.model.GameState
-import dev.toufikforyou.colormatching.main.presentation.animation.rememberFloatingParticle
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
+import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
 import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.main.utils.generateColorPairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HardGameScreen(navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean) {
+fun HardGameScreen(
+    navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
+) {
     // Calculate initial time limit based on level ranges for hard difficulty
     fun calculateTimeLimit(level: Int) = when {
         level < 10 -> 180 // Level 1-9: 180 seconds
@@ -230,22 +224,10 @@ fun HardGameScreen(navController: NavController, soundManager: SoundManager, isS
             })
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.58f),
-                        MaterialTheme.colorScheme.surfaceVariant
-                    )
-                )
-            )
-    ) {
-        // Background particles effect
-        GameBackground()
-
-        Scaffold(containerColor = Color.Transparent, topBar = {
+    Scaffold(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background),
+        topBar = {
             TopAppBar(title = {
                 Text(
                     "Hard Level ${gameState.currentLevel}",
@@ -267,93 +249,69 @@ fun HardGameScreen(navController: NavController, soundManager: SoundManager, isS
             )
             )
         }) { padding ->
-            Column(
+        GameBackground()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Game stats
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Game stats
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                Surface(
+                    modifier = Modifier.padding(8.dp),
+                    color = MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Surface(
-                        modifier = Modifier.padding(8.dp),
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(
-                                text = "Time", style = MaterialTheme.typography.bodyLarge.copy(
-                                    color = MaterialTheme.colorScheme.secondary
-                                )
-                            )
-                            TimerDisplay(timeLeft)
-                        }
-                    }
-                    AnimatedGameStatCard("Score", gameState.score.toString())
-                    AnimatedGameStatCard("Streak", "$currentStreak\n(Max: $maxStreak)")
-                }
-
-                // Color grid with smaller padding for 5x5
-                ColorGrid(gridSize = gameState.gridSize,
-                    colorBoxes = mutableColorBoxes,
-                    showInitialColors = showInitialColors,
-                    onBoxClick = { index ->
-                        if (!showInitialColors && gameState.isGameStarted && !mutableColorBoxes[index].isMatched) {
-                            handleBoxSelection(index)
-                        }
-                    })
-
-                if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
-                    Button(
-                        onClick = { showInitialColors = true },
+                    Column(
                         modifier = Modifier.padding(16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            contentColor = MaterialTheme.colorScheme.onPrimary
-                        )
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Start Game", style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Bold
+                            text = "Time", style = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.secondary
                             )
                         )
+                        TimerDisplay(timeLeft)
                     }
                 }
+                AnimatedGameStatCard("Score", gameState.score.toString())
+                AnimatedGameStatCard("Streak", "$currentStreak\n(Max: $maxStreak)")
             }
-        }
-    }
-}
 
-@Composable
-private fun GameBackground() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .blur(20.dp)
-    ) {
-        repeat(20) { _ /* index */ ->
-            val offset = rememberFloatingParticle()
-            val size = remember { Random.nextInt(8, 17).dp }
-            val alpha = remember { Random.nextFloat() * (0.15f - 0.05f) + 0.05f }
+            // Color grid with smaller padding for 5x5
+            ColorGrid(gridSize = gameState.gridSize,
+                colorBoxes = mutableColorBoxes,
+                showInitialColors = showInitialColors,
+                onBoxClick = { index ->
+                    if (!showInitialColors && gameState.isGameStarted && !mutableColorBoxes[index].isMatched) {
+                        handleBoxSelection(index)
+                    }
+                })
 
-            Box(
-                modifier = Modifier
-                    .size(size)
-                    .offset(
-                        x = offset.x * 300.dp, y = offset.y * 500.dp
+            if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
+                Button(
+                    onClick = { showInitialColors = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
-                    .background(
-                        MaterialTheme.colorScheme.tertiary.copy(alpha = alpha), shape = CircleShape
+                ) {
+                    Text(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        text = "Start Game",
+                        style = MaterialTheme.typography.titleLarge
                     )
-            )
+                }
+            }
         }
     }
 }
