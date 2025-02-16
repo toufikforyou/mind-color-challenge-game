@@ -7,18 +7,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,22 +20,21 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.presentation.components.AnimatedGameScore
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
+import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
+import dev.toufikforyou.colormatching.main.presentation.components.GameStartButton
 import dev.toufikforyou.colormatching.main.presentation.components.GameTimeScore
 import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.main.utils.generateColorPairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EasyGameScreen(
     navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
@@ -209,26 +198,9 @@ fun EasyGameScreen(
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background),
         topBar = {
-            TopAppBar(title = {
-                Text(
-                    "Easy Level ${gameState.currentLevel}",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold
-                    )
-                )
-            }, navigationIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        "Back",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent
-            )
-            )
+            GameAppBar(title = "Easy Level ${gameState.currentLevel}") {
+                navController.navigateUp()
+            }
         }) { paddingValues ->
         GameBackground()
         Column(
@@ -260,23 +232,8 @@ fun EasyGameScreen(
                 })
 
             if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
-                Button(
-                    onClick = { showInitialColors = true },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(32.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Text(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        text = "Start Game",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
+                GameStartButton {
+                    showInitialColors = true
                 }
             }
         }
