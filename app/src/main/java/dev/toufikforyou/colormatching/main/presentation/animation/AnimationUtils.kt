@@ -17,20 +17,16 @@ fun rememberFloatingParticle(): Offset {
 
     LaunchedEffect(Unit) {
         x.animateTo(
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(3000, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
+            targetValue = 1f, animationSpec = infiniteRepeatable(
+                animation = tween(3000, easing = LinearEasing), repeatMode = RepeatMode.Reverse
             )
         )
     }
 
     LaunchedEffect(Unit) {
         y.animateTo(
-            targetValue = 1f,
-            animationSpec = infiniteRepeatable(
-                animation = tween(2000, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse
+            targetValue = 1f, animationSpec = infiniteRepeatable(
+                animation = tween(2000, easing = LinearEasing), repeatMode = RepeatMode.Reverse
             )
         )
     }

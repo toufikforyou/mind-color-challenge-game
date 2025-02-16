@@ -1,5 +1,6 @@
 package dev.toufikforyou.colormatching.main.presentation.screens.game
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,20 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -31,15 +23,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import dev.toufikforyou.colormatching.main.data.HighScoreEntry
+import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
 import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.presentation.components.AnimatedGameScore
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
 import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
+import dev.toufikforyou.colormatching.main.presentation.components.GameExitDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameStartButton
 import dev.toufikforyou.colormatching.main.presentation.components.GameTimeScore
@@ -47,11 +40,16 @@ import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.main.utils.generateColorPairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HardGameScreen(
-    navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
+    navController: NavController,
+    soundManager: SoundManager,
+    isSoundEnabled: Boolean,
+    preferencesDataStore: PreferencesDataStore
 ) {
     // Calculate initial time limit based on level ranges for hard difficulty
     fun calculateTimeLimit(level: Int) = when {
@@ -77,6 +75,8 @@ fun HardGameScreen(
     var showGameOverDialog by remember { mutableStateOf(false) }
     var timeLeft by remember { mutableIntStateOf(gameState.timeLimit) }
     var showInitialColors by remember { mutableStateOf(false) }
+    var showExitDialog by remember { mutableStateOf(false) }
+    var isTimerPaused by remember { mutableStateOf(false) }
 
     var mutableColorBoxes by remember {
         mutableStateOf(generateColorPairs(gameState.gridSize))
@@ -93,6 +93,9 @@ fun HardGameScreen(
     var currentStreak by remember { mutableIntStateOf(0) }
     var maxStreak by remember { mutableIntStateOf(0) }
     var lastMatchTime by remember { mutableLongStateOf(0L) }
+
+    // Collect high scores
+    val highScores by preferencesDataStore.highScores.collectAsState(initial = emptyList())
 
     // Handle box selection function with enhanced scoring
     val handleBoxSelection = { index: Int ->
@@ -175,9 +178,8 @@ fun HardGameScreen(
     }
 
     // Game timer
-    LaunchedEffect(gameState.isGameStarted, gameState.currentLevel) {
-        if (gameState.isGameStarted) {
-            timeLeft = gameState.timeLimit
+    LaunchedEffect(gameState.isGameStarted, gameState.currentLevel, isTimerPaused) {
+        if (gameState.isGameStarted && !isTimerPaused) {
             while (timeLeft > 0) {
                 delay(1000)
                 timeLeft--
@@ -198,10 +200,38 @@ fun HardGameScreen(
         }
     }
 
+    // Add BackHandler
+    BackHandler {
+        if (gameState.isGameStarted) {
+            showExitDialog = true
+            isTimerPaused = true
+        } else {
+            navController.navigateUp()
+        }
+    }
+
     if (showGameOverDialog) {
+        // Create new high score entry when game is over
+        LaunchedEffect(Unit) {
+            val newScore = HighScoreEntry(
+                score = gameState.score,
+                level = gameState.currentLevel,
+                difficulty = "Hard",
+                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            )
+
+            // Only update if it's a high score
+            if (highScores.size < 10 || highScores.any { it.score <= newScore.score }) {
+                preferencesDataStore.updateHighScore(newScore)
+            }
+        }
+
         GameOverDialog(score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
+            difficulty = "Hard",
+            level = gameState.currentLevel,
+            highScores = highScores,
             onTryAgain = {
                 showGameOverDialog = false
                 gameState = GameState(
@@ -219,12 +249,29 @@ fun HardGameScreen(
             })
     }
 
+    if (showExitDialog) {
+        GameExitDialog(onDismiss = {
+            showExitDialog = false
+            isTimerPaused = false
+        }, onConfirm = {
+            if (isSoundEnabled) {
+                soundManager.playButtonClick()
+            }
+            navController.navigateUp()
+        })
+    }
+
     Scaffold(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background),
         topBar = {
             GameAppBar(title = "Hard Level ${gameState.currentLevel}") {
-                navController.navigateUp()
+                if (gameState.isGameStarted) {
+                    showExitDialog = true
+                    isTimerPaused = true
+                } else {
+                    navController.navigateUp()
+                }
             }
         }) { padding ->
         GameBackground()

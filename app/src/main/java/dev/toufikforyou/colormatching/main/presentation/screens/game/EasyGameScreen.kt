@@ -1,5 +1,6 @@
 package dev.toufikforyou.colormatching.main.presentation.screens.game
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -22,11 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import dev.toufikforyou.colormatching.main.data.HighScoreEntry
+import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
 import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.presentation.components.AnimatedGameScore
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
 import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
+import dev.toufikforyou.colormatching.main.presentation.components.GameExitDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameStartButton
 import dev.toufikforyou.colormatching.main.presentation.components.GameTimeScore
@@ -34,10 +39,16 @@ import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.main.utils.generateColorPairs
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun EasyGameScreen(
-    navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
+    navController: NavController,
+    soundManager: SoundManager,
+    isSoundEnabled: Boolean,
+    preferencesDataStore: PreferencesDataStore
 ) {
     // Calculate initial time limit based on level ranges
     fun calculateTimeLimit(level: Int) = when {
@@ -64,6 +75,8 @@ fun EasyGameScreen(
     var showGameOverDialog by remember { mutableStateOf(false) }
     var timeLeft by remember { mutableIntStateOf(gameState.timeLimit) }
     var showInitialColors by remember { mutableStateOf(false) }
+    var showExitDialog by remember { mutableStateOf(false) }
+    var isTimerPaused by remember { mutableStateOf(false) }
 
     var mutableColorBoxes by remember {
         mutableStateOf(generateColorPairs(gameState.gridSize))
@@ -75,6 +88,9 @@ fun EasyGameScreen(
     val totalPairs = remember(gameState.gridSize) {
         (gameState.gridSize * gameState.gridSize) / 2
     }
+
+    // Collect high scores
+    val highScores by preferencesDataStore.highScores.collectAsState(initial = emptyList())
 
     // Handle box selection function
     val handleBoxSelection = { index: Int ->
@@ -151,10 +167,9 @@ fun EasyGameScreen(
         }
     }
 
-    // Game timer
-    LaunchedEffect(gameState.isGameStarted, gameState.currentLevel) {
-        if (gameState.isGameStarted) {
-            timeLeft = gameState.timeLimit
+    // Game timer with pause support
+    LaunchedEffect(gameState.isGameStarted, gameState.currentLevel, isTimerPaused) {
+        if (gameState.isGameStarted && !isTimerPaused) {
             while (timeLeft > 0) {
                 delay(1000)
                 timeLeft--
@@ -175,10 +190,39 @@ fun EasyGameScreen(
         }
     }
 
+    // Handle back press
+    BackHandler {
+        if (gameState.isGameStarted) {
+            showExitDialog = true
+            isTimerPaused = true
+        } else {
+            navController.navigateUp()
+        }
+    }
+
+    // Update the game over dialog section
     if (showGameOverDialog) {
+        // Create new high score entry when game is over
+        LaunchedEffect(Unit) {
+            val newScore = HighScoreEntry(
+                score = gameState.score,
+                level = gameState.currentLevel,
+                difficulty = "Easy",
+                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            )
+
+            // Only update if it's a high score
+            if (highScores.size < 10 || highScores.any { it.score <= newScore.score }) {
+                preferencesDataStore.updateHighScore(newScore)
+            }
+        }
+
         GameOverDialog(score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
+            difficulty = "Easy",
+            level = gameState.currentLevel,
+            highScores = highScores,
             onTryAgain = {
                 showGameOverDialog = false
                 gameState = GameState(
@@ -199,7 +243,12 @@ fun EasyGameScreen(
         .background(MaterialTheme.colorScheme.background),
         topBar = {
             GameAppBar(title = "Easy Level ${gameState.currentLevel}") {
-                navController.navigateUp()
+                if (gameState.isGameStarted) {
+                    showExitDialog = true
+                    isTimerPaused = true
+                } else {
+                    navController.navigateUp()
+                }
             }
         }) { paddingValues ->
         GameBackground()
@@ -236,6 +285,19 @@ fun EasyGameScreen(
                     showInitialColors = true
                 }
             }
+        }
+
+        // Show exit confirmation dialog
+        if (showExitDialog) {
+            GameExitDialog(onDismiss = {
+                showExitDialog = false
+                isTimerPaused = false
+            }, onConfirm = {
+                if (isSoundEnabled) {
+                    soundManager.playButtonClick()
+                }
+                navController.navigateUp()
+            })
         }
     }
 }

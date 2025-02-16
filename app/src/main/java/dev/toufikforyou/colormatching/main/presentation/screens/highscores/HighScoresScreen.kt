@@ -14,54 +14,38 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import dev.toufikforyou.colormatching.main.data.HighScoreEntry
+import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
+import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HighScoresScreen(navController: NavController) {
+fun HighScoresScreen(
+    navController: NavController, preferencesDataStore: PreferencesDataStore
+) {
+    val highScores by preferencesDataStore.highScores.collectAsState(initial = emptyList())
+
     Scaffold(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background),
         topBar = {
-            TopAppBar(title = {
-                Text(
-                    "High Scores", style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold
-                    )
-                )
-            }, navigationIcon = {
-                IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }, colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent
-            )
-            )
+            GameAppBar(title = "High Scores") {
+                navController.navigateUp()
+            }
         }) { padding ->
         GameBackground()
         Column(
@@ -73,98 +57,108 @@ fun HighScoresScreen(navController: NavController) {
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Top Scores List
-            ScoresList()
+            // Show scores for each difficulty
+            DifficultyScores("Easy Mode", highScores.filter { it.difficulty == "Easy" })
+            Spacer(modifier = Modifier.height(16.dp))
+
+            DifficultyScores("Medium Mode", highScores.filter { it.difficulty == "Medium" })
+            Spacer(modifier = Modifier.height(16.dp))
+
+            DifficultyScores("Hard Mode", highScores.filter { it.difficulty == "Hard" })
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-private fun ScoresList() {
-    Column(
+private fun DifficultyScores(difficulty: String, scores: List<HighScoreEntry>) {
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        repeat(10) { index ->
-            ScoreItem(
-                rank = index + 1,
-                score = (1000 - (index * 50)).toString(),
-                date = "2024-02-${20 - index}"
-            )
-        }
-    }
-}
-
-@Composable
-private fun ScoreItem(rank: Int, score: String, date: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = MaterialTheme.shapes.medium
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Rank Circle
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .background(
-                            when (rank) {
-                                1 -> MaterialTheme.colorScheme.primary
-                                2 -> MaterialTheme.colorScheme.secondary
-                                3 -> MaterialTheme.colorScheme.tertiary
-                                else -> MaterialTheme.colorScheme.onSurface
-                            }
-                        ), contentAlignment = Alignment.Center
+            Text(
+                text = difficulty, style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ), color = MaterialTheme.colorScheme.primary
+            )
+
+            if (scores.isEmpty()) {
+                Text(
+                    "No scores yet",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                // Header Row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Absolute.SpaceBetween
                 ) {
-                    Text(
-                        text = "#$rank",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
+                    mutableListOf("Rank", "Level", "Score", "Date").forEach {
+                        Text(
+                            text = it, style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ), color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
 
-                Column {
-                    Text(
-                        text = score, style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
-                        ), color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = date,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    )
+                // Score Items
+                scores.sortedByDescending { it.score }.take(5).forEachIndexed { index, score ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    when (index) {
+                                        0 -> MaterialTheme.colorScheme.primary
+                                        1 -> MaterialTheme.colorScheme.secondary
+                                        2 -> MaterialTheme.colorScheme.tertiary
+                                        else -> MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                            alpha = 0.5f
+                                        )
+                                    }
+                                ), contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "#${index + 1}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                        Text(
+                            text = "${score.level}", style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Text(
+                            text = "${score.score}",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+
+                        Text(
+                            text = score.date,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
-
-            Icon(
-                imageVector = Icons.Default.CheckCircle,
-                contentDescription = null,
-                tint = when (rank) {
-                    1 -> Color(0xFF1DDA25)
-                    2 -> Color(0xFFC77F37)
-                    3 -> Color(0xFF2196F3)
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                },
-                modifier = Modifier.size(24.dp)
-            )
         }
     }
 } 

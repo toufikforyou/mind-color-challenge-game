@@ -26,10 +26,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val isDarkMode by preferencesDataStore.isDarkMode.collectAsState(initial = true)
             val useSystemTheme by preferencesDataStore.useSystemTheme.collectAsState(initial = true)
-            
+
             // Get the system dark mode preference
             val isSystemInDarkTheme = isSystemInDarkTheme()
-            
+
             // Use system theme if enabled, otherwise use user preference
             val shouldUseDarkTheme = if (useSystemTheme) {
                 isSystemInDarkTheme
