@@ -44,14 +44,10 @@ import dev.toufikforyou.colormatching.main.presentation.components.GameBackgroun
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HighScoresScreen(navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        GameBackground()
-
-        Scaffold(containerColor = Color.Transparent, topBar = {
+    Scaffold(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background),
+        topBar = {
             TopAppBar(title = {
                 Text(
                     "High Scores", style = MaterialTheme.typography.titleLarge.copy(
@@ -72,23 +68,23 @@ fun HighScoresScreen(navController: NavController) {
             )
             )
         }) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(24.dp))
+        GameBackground()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(24.dp))
 
-                // Difficulty Tabs
-                DifficultyTabs()
+            // Difficulty Tabs
+            DifficultyTabs()
 
-                Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-                // Top Scores List
-                ScoresList()
-            }
+            // Top Scores List
+            ScoresList()
         }
     }
 }

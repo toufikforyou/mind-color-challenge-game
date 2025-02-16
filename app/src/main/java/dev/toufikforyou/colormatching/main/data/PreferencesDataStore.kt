@@ -17,6 +17,7 @@ class PreferencesDataStore(context: Context) {
     companion object {
         val IS_DARK_MODE = booleanPreferencesKey("is_dark_mode")
         val IS_SOUND_ENABLED = booleanPreferencesKey("is_sound_enabled")
+        val USE_SYSTEM_THEME = booleanPreferencesKey("use_system_theme")
     }
 
     val isDarkMode: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -25,6 +26,10 @@ class PreferencesDataStore(context: Context) {
 
     val isSoundEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[IS_SOUND_ENABLED] ?: true
+    }
+
+    val useSystemTheme: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[USE_SYSTEM_THEME] ?: true
     }
 
     suspend fun updateDarkMode(isDarkMode: Boolean) {
@@ -36,6 +41,12 @@ class PreferencesDataStore(context: Context) {
     suspend fun updateSoundEnabled(isEnabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[IS_SOUND_ENABLED] = isEnabled
+        }
+    }
+
+    suspend fun updateUseSystemTheme(useSystem: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[USE_SYSTEM_THEME] = useSystem
         }
     }
 } 
