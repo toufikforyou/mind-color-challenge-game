@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.rememberNavController
@@ -24,14 +25,25 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val isDarkMode by preferencesDataStore.isDarkMode.collectAsState(initial = true)
-            ColorMatchingTheme(darkTheme = isDarkMode) {
+            val useSystemTheme by preferencesDataStore.useSystemTheme.collectAsState(initial = true)
+            
+            // Get the system dark mode preference
+            val isSystemInDarkTheme = isSystemInDarkTheme()
+            
+            // Use system theme if enabled, otherwise use user preference
+            val shouldUseDarkTheme = if (useSystemTheme) {
+                isSystemInDarkTheme
+            } else {
+                isDarkMode
+            }
+
+            ColorMatchingTheme(darkTheme = shouldUseDarkTheme) {
                 val navController = rememberNavController()
                 NavGraph(
                     navController = navController,
                     preferencesDataStore = preferencesDataStore,
                     soundManager = soundManager
                 )
-
             }
         }
     }

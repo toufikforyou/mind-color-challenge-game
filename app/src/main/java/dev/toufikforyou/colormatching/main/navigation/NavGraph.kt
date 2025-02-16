@@ -27,6 +27,7 @@ fun NavGraph(
 ) {
     val isDarkMode by preferencesDataStore.isDarkMode.collectAsState(initial = true)
     val isSoundEnabled by preferencesDataStore.isSoundEnabled.collectAsState(initial = true)
+    val useSystemTheme by preferencesDataStore.useSystemTheme.collectAsState(initial = true)
     val scope = rememberCoroutineScope()
 
     NavHost(
@@ -41,15 +42,21 @@ fun NavGraph(
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(navController = navController,
+            SettingsScreen(
+                navController = navController,
                 isDarkMode = isDarkMode,
                 isSoundEnabled = isSoundEnabled,
+                useSystemTheme = useSystemTheme,
                 onDarkModeChanged = {
                     scope.launch { preferencesDataStore.updateDarkMode(it) }
                 },
                 onSoundEnabledChanged = {
                     scope.launch { preferencesDataStore.updateSoundEnabled(it) }
-                })
+                },
+                onUseSystemThemeChanged = {
+                    scope.launch { preferencesDataStore.updateUseSystemTheme(it) }
+                }
+            )
         }
 
         composable(Screen.LevelSelection.route) {

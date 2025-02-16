@@ -2,7 +2,6 @@ package dev.toufikforyou.colormatching.main.presentation.screens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +27,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -42,24 +40,16 @@ fun SettingsScreen(
     navController: NavController,
     isDarkMode: Boolean,
     isSoundEnabled: Boolean,
+    useSystemTheme: Boolean,
     onDarkModeChanged: (Boolean) -> Unit,
-    onSoundEnabledChanged: (Boolean) -> Unit
+    onSoundEnabledChanged: (Boolean) -> Unit,
+    onUseSystemThemeChanged: (Boolean) -> Unit
 ) {
-    Box(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.58f),
-                        MaterialTheme.colorScheme.surfaceVariant
-                    )
-                )
-            )
-    ) {
-        GameBackground()
-
-        Scaffold(containerColor = Color.Transparent, topBar = {
+            .background(MaterialTheme.colorScheme.background),
+        topBar = {
             TopAppBar(title = {
                 Text(
                     "Settings", style = MaterialTheme.typography.headlineMedium.copy(
@@ -80,27 +70,36 @@ fun SettingsScreen(
             )
             )
         }) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+        GameBackground()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            SettingsItem(
+                title = "Use System Theme",
+                icon = if (useSystemTheme) Icons.Default.CheckCircle else Icons.Filled.CheckCircle,
+                isChecked = useSystemTheme,
+                onCheckedChange = onUseSystemThemeChanged
+            )
+
+            if (!useSystemTheme) {
                 SettingsItem(
                     title = "Dark Mode",
                     icon = if (isDarkMode) Icons.Default.CheckCircle else Icons.Filled.CheckCircle,
                     isChecked = isDarkMode,
                     onCheckedChange = onDarkModeChanged
                 )
-
-                SettingsItem(
-                    title = "Sound Effects",
-                    icon = if (isSoundEnabled) Icons.Default.Add else Icons.Default.AddCircle,
-                    isChecked = isSoundEnabled,
-                    onCheckedChange = onSoundEnabledChanged
-                )
             }
+
+            SettingsItem(
+                title = "Sound Effects",
+                icon = if (isSoundEnabled) Icons.Default.Add else Icons.Default.AddCircle,
+                isChecked = isSoundEnabled,
+                onCheckedChange = onSoundEnabledChanged
+            )
         }
     }
 }
