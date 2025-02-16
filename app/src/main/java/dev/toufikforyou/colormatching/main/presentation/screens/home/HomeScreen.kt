@@ -11,7 +11,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -51,15 +51,15 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import dev.toufikforyou.colormatching.BuildConfig
+import dev.toufikforyou.colormatching.R
 import dev.toufikforyou.colormatching.main.navigation.Screen
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.utils.SoundManager
@@ -84,9 +84,13 @@ fun HomeScreen(
                     .verticalScroll(scrollState),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Spacer(modifier = Modifier.height(24.dp))
 
-                AnimatedLogo()
+                // Replace old AnimatedLogo with new animated logo
+                Image(
+                    painter = painterResource(id = R.drawable.color_matching_game_icon),
+                    contentDescription = "Game Logo",
+                    modifier = Modifier.size(200.dp)
+                )
 
                 Spacer(modifier = Modifier.height(48.dp))
 
@@ -135,56 +139,6 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
-    }
-}
-
-@Composable
-private fun AnimatedLogo() {
-    var animationState by remember { mutableStateOf(false) }
-    val rotation by animateFloatAsState(
-        targetValue = if (animationState) 360f else 0f, animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing), repeatMode = RepeatMode.Restart
-        )
-    )
-
-    val scale by animateFloatAsState(
-        targetValue = if (animationState) 1.2f else 1f, animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMedium
-        )
-    )
-
-    LaunchedEffect(Unit) {
-        animationState = true
-    }
-
-    val primary = MaterialTheme.colorScheme.primary
-    val secondary = MaterialTheme.colorScheme.secondary
-
-    val gradientColors = remember(primary, secondary) {
-        listOf(primary, secondary)
-    }
-
-    Box(
-        modifier = Modifier
-            .size(200.dp)
-            .scale(scale)
-            .clip(MaterialTheme.shapes.large),
-        contentAlignment = Alignment.Center,
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(
-                brush = Brush.radialGradient(colors = gradientColors), size = size
-            )
-        }
-
-        Text(
-            text = "🎨",
-            modifier = Modifier
-                .size(120.dp)
-                .rotate(rotation),
-            style = MaterialTheme.typography.displayLarge,
-            fontSize = 80.sp
-        )
     }
 }
 
