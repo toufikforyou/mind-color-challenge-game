@@ -8,11 +8,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
-import dev.toufikforyou.colormatching.main.presentation.screens.guide.GuideScreen
-import dev.toufikforyou.colormatching.main.presentation.screens.highscores.HighScoresScreen
 import dev.toufikforyou.colormatching.main.presentation.screens.game.EasyGameScreen
 import dev.toufikforyou.colormatching.main.presentation.screens.game.HardGameScreen
 import dev.toufikforyou.colormatching.main.presentation.screens.game.MediumGameScreen
+import dev.toufikforyou.colormatching.main.presentation.screens.guide.GuideScreen
+import dev.toufikforyou.colormatching.main.presentation.screens.highscores.HighScoresScreen
 import dev.toufikforyou.colormatching.main.presentation.screens.home.HomeScreen
 import dev.toufikforyou.colormatching.main.presentation.screens.levelselection.LevelSelectionScreen
 import dev.toufikforyou.colormatching.main.presentation.screens.settings.SettingsScreen
@@ -42,8 +42,7 @@ fun NavGraph(
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(
-                navController = navController,
+            SettingsScreen(navController = navController,
                 isDarkMode = isDarkMode,
                 isSoundEnabled = isSoundEnabled,
                 useSystemTheme = useSystemTheme,
@@ -55,8 +54,7 @@ fun NavGraph(
                 },
                 onUseSystemThemeChanged = {
                     scope.launch { preferencesDataStore.updateUseSystemTheme(it) }
-                }
-            )
+                })
         }
 
         composable(Screen.LevelSelection.route) {
@@ -64,15 +62,30 @@ fun NavGraph(
         }
 
         composable(Screen.Game.Easy.route) {
-            EasyGameScreen(navController, soundManager, isSoundEnabled)
+            EasyGameScreen(
+                navController = navController,
+                soundManager = soundManager,
+                isSoundEnabled = isSoundEnabled,
+                preferencesDataStore = preferencesDataStore
+            )
         }
 
         composable(Screen.Game.Medium.route) {
-            MediumGameScreen(navController, soundManager, isSoundEnabled)
+            MediumGameScreen(
+                navController = navController,
+                soundManager = soundManager,
+                isSoundEnabled = isSoundEnabled,
+                preferencesDataStore = preferencesDataStore
+            )
         }
 
         composable(Screen.Game.Hard.route) {
-            HardGameScreen(navController, soundManager, isSoundEnabled)
+            HardGameScreen(
+                navController = navController,
+                soundManager = soundManager,
+                isSoundEnabled = isSoundEnabled,
+                preferencesDataStore = preferencesDataStore
+            )
         }
 
         composable(Screen.Guide.route) {
@@ -80,7 +93,9 @@ fun NavGraph(
         }
 
         composable(Screen.HighScores.route) {
-            HighScoresScreen(navController)
+            HighScoresScreen(
+                navController = navController, preferencesDataStore = preferencesDataStore
+            )
         }
     }
 } 
