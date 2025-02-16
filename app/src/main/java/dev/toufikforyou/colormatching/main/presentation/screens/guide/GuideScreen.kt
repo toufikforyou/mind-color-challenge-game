@@ -40,16 +40,14 @@ import dev.toufikforyou.colormatching.main.presentation.components.GameBackgroun
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GuideScreen(navController: NavController) {
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+    Scaffold(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background),
         topBar = {
             TopAppBar(title = {
                 Text(
                     "How to Play", style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
+                        fontWeight = FontWeight.ExtraBold
                     )
                 )
             }, navigationIcon = {

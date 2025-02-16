@@ -45,14 +45,13 @@ fun SettingsScreen(
     onSoundEnabledChanged: (Boolean) -> Unit,
     onUseSystemThemeChanged: (Boolean) -> Unit
 ) {
-    Scaffold(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+    Scaffold(modifier = Modifier
+        .fillMaxSize()
+        .background(MaterialTheme.colorScheme.background),
         topBar = {
             TopAppBar(title = {
                 Text(
-                    "Settings", style = MaterialTheme.typography.headlineMedium.copy(
+                    "Settings", style = MaterialTheme.typography.titleLarge.copy(
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
@@ -140,7 +139,7 @@ private fun SettingsItem(
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = MaterialTheme.colorScheme.primary,
-                    checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                    checkedTrackColor = MaterialTheme.colorScheme.background.copy(alpha = 0.8f),
                     uncheckedThumbColor = MaterialTheme.colorScheme.outline,
                     uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
                 )
