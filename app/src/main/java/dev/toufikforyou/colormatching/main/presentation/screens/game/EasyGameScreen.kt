@@ -233,18 +233,18 @@ fun EasyGameScreen(
             highScores = highScores,
             onTryAgain = {
                 showGameOverDialog = false
-                viewModel.updateGameState {
-                    it.copy(
-                        gridSize = 3,
-                        timeLimit = viewModel.calculateTimeLimit(1),
-                        isGameStarted = false,
-                        currentLevel = 1,
+                viewModel.updateGameState { currentState ->
+                    currentState.copy(
+                        timeLimit = viewModel.calculateTimeLimit(currentState.currentLevel),
                         matchedPairs = 0,
-                        score = 0
+                        isGameStarted = false,
+                        score = currentState.score
                     )
                 }
-                timeLeft = gameState.timeLimit
+                timeLeft = viewModel.calculateTimeLimit(gameState.currentLevel)
                 mutableColorBoxes = generateColorPairs(gameState.gridSize)
+                selectedBoxes.clear()
+                showInitialColors = true
             },
             onBack = {
                 navController.navigateUp()

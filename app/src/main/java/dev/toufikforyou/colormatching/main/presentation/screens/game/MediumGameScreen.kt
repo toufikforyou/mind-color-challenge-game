@@ -27,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.toufikforyou.colormatching.main.data.local.entity.GameProgress
-import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.presentation.components.AnimatedGameScore
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
 import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
@@ -234,17 +233,18 @@ fun MediumGameScreen(
             highScores = highScores,
             onTryAgain = {
                 showGameOverDialog = false
-                viewModel.updateGameState {
-                    GameState(
-                        gridSize = 4,
-                        timeLimit = viewModel.calculateTimeLimit(1),
-                        isGameStarted = false
+                viewModel.updateGameState { currentState ->
+                    currentState.copy(
+                        timeLimit = viewModel.calculateTimeLimit(currentState.currentLevel),
+                        matchedPairs = 0,
+                        isGameStarted = false,
+                        score = currentState.score
                     )
                 }
-                timeLeft = gameState.timeLimit
+                timeLeft = viewModel.calculateTimeLimit(gameState.currentLevel)
                 mutableColorBoxes = generateColorPairs(gameState.gridSize)
                 selectedBoxes.clear()
-                showInitialColors = false
+                showInitialColors = true
             },
             onBack = {
                 navController.navigateUp()
