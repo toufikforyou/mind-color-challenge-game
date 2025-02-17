@@ -2,12 +2,17 @@ package dev.toufikforyou.colormatching.main.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
 import dev.toufikforyou.colormatching.main.data.local.dao.GameProgressDao
+import dev.toufikforyou.colormatching.main.data.local.dao.HighScoreDao
+import dev.toufikforyou.colormatching.main.data.local.entity.HighScore
 import dev.toufikforyou.colormatching.main.domain.model.GameState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.text.SimpleDateFormat
+import java.util.*
 
 class GameViewModel(
     val gameProgressDao: GameProgressDao,
+    val highScoreDao: HighScoreDao,
     initialGridSize: Int,
     private val difficulty: String
 ) : ViewModel() {
@@ -57,5 +62,16 @@ class GameViewModel(
 
             else -> 30
         }
+    }
+
+    suspend fun saveHighScore(score: Int, level: Int, difficulty: String) {
+        val newScore = HighScore(
+            score = score,
+            level = level,
+            difficulty = difficulty,
+            date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        )
+        highScoreDao.insertHighScore(newScore)
+        highScoreDao.deleteOldScores(difficulty, newScore.score)
     }
 } 

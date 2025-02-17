@@ -28,7 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.toufikforyou.colormatching.main.data.HighScoreEntry
+import dev.toufikforyou.colormatching.main.data.local.entity.HighScore
 import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.presentation.viewmodels.HighScoresViewModel
@@ -74,7 +74,7 @@ fun HighScoresScreen(
 }
 
 @Composable
-private fun DifficultyScores(difficulty: String, scores: List<HighScoreEntry>) {
+private fun DifficultyScores(difficulty: String, scores: List<HighScore>) {
     Card(
         modifier = Modifier
             .fillMaxWidth()

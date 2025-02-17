@@ -65,8 +65,7 @@ fun NavGraph(
             EasyGameScreen(
                 navController = navController,
                 soundManager = soundManager,
-                isSoundEnabled = isSoundEnabled,
-                preferencesDataStore = preferencesDataStore
+                isSoundEnabled = isSoundEnabled
             )
         }
 
@@ -74,8 +73,7 @@ fun NavGraph(
             MediumGameScreen(
                 navController = navController,
                 soundManager = soundManager,
-                isSoundEnabled = isSoundEnabled,
-                preferencesDataStore = preferencesDataStore
+                isSoundEnabled = isSoundEnabled
             )
         }
 
@@ -83,8 +81,7 @@ fun NavGraph(
             HardGameScreen(
                 navController = navController,
                 soundManager = soundManager,
-                isSoundEnabled = isSoundEnabled,
-                preferencesDataStore = preferencesDataStore
+                isSoundEnabled = isSoundEnabled
             )
         }
 

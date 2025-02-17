@@ -6,10 +6,17 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import dev.toufikforyou.colormatching.main.data.local.dao.GameProgressDao
 import dev.toufikforyou.colormatching.main.data.local.entity.GameProgress
+import dev.toufikforyou.colormatching.main.data.local.entity.HighScore
+import dev.toufikforyou.colormatching.main.data.local.dao.HighScoreDao
 
-@Database(entities = [GameProgress::class], version = 1)
+@Database(
+    entities = [GameProgress::class, HighScore::class],
+    version = 1,
+    exportSchema = false
+)
 abstract class GameDatabase : RoomDatabase() {
     abstract fun gameProgressDao(): GameProgressDao
+    abstract fun highScoreDao(): HighScoreDao
 
     companion object {
         @Volatile

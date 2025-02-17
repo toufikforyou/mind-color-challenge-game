@@ -14,7 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import dev.toufikforyou.colormatching.main.data.HighScoreEntry
+import dev.toufikforyou.colormatching.main.data.local.entity.HighScore
 
 @Composable
 fun GameOverDialog(
@@ -23,7 +23,7 @@ fun GameOverDialog(
     totalPairs: Int,
     difficulty: String,
     level: Int,
-    highScores: List<HighScoreEntry>,
+    highScores: List<HighScore>,
     onTryAgain: () -> Unit,
     onBack: () -> Unit
 ) {

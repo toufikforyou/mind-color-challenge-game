@@ -25,8 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.toufikforyou.colormatching.main.data.HighScoreEntry
-import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
 import dev.toufikforyou.colormatching.main.data.local.entity.GameProgress
 import dev.toufikforyou.colormatching.main.presentation.components.AnimatedGameScore
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
@@ -44,19 +42,19 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun EasyGameScreen(
     navController: NavController,
     soundManager: SoundManager,
-    isSoundEnabled: Boolean,
-    preferencesDataStore: PreferencesDataStore
+    isSoundEnabled: Boolean
 ) {
     val viewModel: GameViewModel = koinViewModel { parametersOf(3, "Easy") }
     val gameState by viewModel.gameState.collectAsState()
+    
+    // Add this to collect high scores
+    val highScores by viewModel.highScoreDao.getHighScoresByDifficulty("Easy")
+        .collectAsState(initial = emptyList())
 
     val scope = rememberCoroutineScope()
     var showGameOverDialog by remember { mutableStateOf(false) }
@@ -75,9 +73,6 @@ fun EasyGameScreen(
     val totalPairs = remember(gameState.gridSize) {
         (gameState.gridSize * gameState.gridSize) / 2
     }
-
-    // Collect high scores
-    val highScores by preferencesDataStore.highScores.collectAsState(initial = emptyList())
 
     // Add state for showing resume dialog
     var showResumeDialog by remember { mutableStateOf(false) }
@@ -226,27 +221,20 @@ fun EasyGameScreen(
 
     // Update the game over dialog section
     if (showGameOverDialog) {
-        // Create new high score entry when game is over
         LaunchedEffect(Unit) {
-            val newScore = HighScoreEntry(
+            viewModel.saveHighScore(
                 score = gameState.score,
                 level = gameState.currentLevel,
-                difficulty = "Easy",
-                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                difficulty = "Easy"
             )
-
-            // Only update if it's a high score
-            if (highScores.size < 10 || highScores.any { it.score <= newScore.score }) {
-                preferencesDataStore.updateHighScore(newScore)
-            }
         }
 
-        GameOverDialog(score = gameState.score,
+        GameOverDialog(
+            score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             difficulty = "Easy",
             level = gameState.currentLevel,
-            highScores = highScores,
             onTryAgain = {
                 showGameOverDialog = false
                 viewModel.updateGameState {
@@ -266,7 +254,9 @@ fun EasyGameScreen(
             },
             onBack = {
                 navController.navigateUp()
-            })
+            },
+            highScores = highScores
+        )
     }
 
     // Add resume dialog

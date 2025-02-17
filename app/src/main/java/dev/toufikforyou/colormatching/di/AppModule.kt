@@ -17,12 +17,14 @@ val appModule = module {
 
 val dataModule = module {
     single { get<GameDatabase>().gameProgressDao() }
+    single { get<GameDatabase>().highScoreDao() }
 }
 
 val viewModelModule = module {
     viewModel { (gridSize: Int, difficulty: String) ->
         GameViewModel(
             gameProgressDao = get(),
+            highScoreDao = get(),
             initialGridSize = gridSize,
             difficulty = difficulty
         )
@@ -30,7 +32,7 @@ val viewModelModule = module {
     
     viewModel {
         HighScoresViewModel(
-            preferencesDataStore = get()
+            highScoreDao = get()
         )
     }
 } 

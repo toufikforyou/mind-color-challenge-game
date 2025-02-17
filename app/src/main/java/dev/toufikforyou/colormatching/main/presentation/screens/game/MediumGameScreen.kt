@@ -26,8 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.toufikforyou.colormatching.main.data.HighScoreEntry
-import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
 import dev.toufikforyou.colormatching.main.data.local.entity.GameProgress
 import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.presentation.components.AnimatedGameScore
@@ -46,16 +44,10 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun MediumGameScreen(
-    navController: NavController,
-    soundManager: SoundManager,
-    isSoundEnabled: Boolean,
-    preferencesDataStore: PreferencesDataStore
+    navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
 ) {
     val viewModel: GameViewModel = koinViewModel { parametersOf(4, "Medium") }
     val gameState by viewModel.gameState.collectAsState()
@@ -82,7 +74,8 @@ fun MediumGameScreen(
     var lastMatchTime by remember { mutableLongStateOf(0L) }
 
     // Collect high scores
-    val highScores by preferencesDataStore.highScores.collectAsState(initial = emptyList())
+    val highScores by viewModel.highScoreDao.getHighScoresByDifficulty("Medium")
+        .collectAsState(initial = emptyList())
 
     // Add state for showing resume dialog
     var showResumeDialog by remember { mutableStateOf(false) }
@@ -227,19 +220,10 @@ fun MediumGameScreen(
     }
 
     if (showGameOverDialog) {
-        // Create new high score entry when game is over
         LaunchedEffect(Unit) {
-            val newScore = HighScoreEntry(
-                score = gameState.score,
-                level = gameState.currentLevel,
-                difficulty = "Medium",
-                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            viewModel.saveHighScore(
+                score = gameState.score, level = gameState.currentLevel, difficulty = "Medium"
             )
-
-            // Only update if it's a high score
-            if (highScores.size < 10 || highScores.any { it.score <= newScore.score }) {
-                preferencesDataStore.updateHighScore(newScore)
-            }
         }
 
         GameOverDialog(score = gameState.score,
@@ -268,8 +252,7 @@ fun MediumGameScreen(
     }
 
     if (showResumeDialog && savedProgress != null) {
-        ResumeGameDialog(
-            difficulty = "Medium",
+        ResumeGameDialog(difficulty = "Medium",
             level = savedProgress!!.level,
             score = savedProgress!!.score,
             onResume = {
