@@ -232,14 +232,11 @@ fun HardGameScreen(
     if (showGameOverDialog) {
         LaunchedEffect(Unit) {
             viewModel.saveHighScore(
-                score = gameState.score,
-                level = gameState.currentLevel,
-                difficulty = "Hard"
+                score = gameState.score, level = gameState.currentLevel, difficulty = "Hard"
             )
         }
 
-        GameOverDialog(
-            score = gameState.score,
+        GameOverDialog(score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             difficulty = "Hard",
@@ -263,8 +260,7 @@ fun HardGameScreen(
             },
             onBack = {
                 navController.navigateUp()
-            }
-        )
+            })
     }
 
     if (showExitDialog) {

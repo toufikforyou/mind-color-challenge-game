@@ -45,13 +45,11 @@ import org.koin.core.parameter.parametersOf
 
 @Composable
 fun EasyGameScreen(
-    navController: NavController,
-    soundManager: SoundManager,
-    isSoundEnabled: Boolean
+    navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
 ) {
     val viewModel: GameViewModel = koinViewModel { parametersOf(3, "Easy") }
     val gameState by viewModel.gameState.collectAsState()
-    
+
     // Add this to collect high scores
     val highScores by viewModel.highScoreDao.getHighScoresByDifficulty("Easy")
         .collectAsState(initial = emptyList())
@@ -223,14 +221,11 @@ fun EasyGameScreen(
     if (showGameOverDialog) {
         LaunchedEffect(Unit) {
             viewModel.saveHighScore(
-                score = gameState.score,
-                level = gameState.currentLevel,
-                difficulty = "Easy"
+                score = gameState.score, level = gameState.currentLevel, difficulty = "Easy"
             )
         }
 
-        GameOverDialog(
-            score = gameState.score,
+        GameOverDialog(score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             difficulty = "Easy",
@@ -250,13 +245,10 @@ fun EasyGameScreen(
                 }
                 timeLeft = gameState.timeLimit
                 mutableColorBoxes = generateColorPairs(gameState.gridSize)
-                selectedBoxes.clear()
-                showInitialColors = false
             },
             onBack = {
                 navController.navigateUp()
-            }
-        )
+            })
     }
 
     // Add resume dialog

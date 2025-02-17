@@ -222,14 +222,11 @@ fun MediumGameScreen(
     if (showGameOverDialog) {
         LaunchedEffect(Unit) {
             viewModel.saveHighScore(
-                score = gameState.score,
-                level = gameState.currentLevel,
-                difficulty = "Medium"
+                score = gameState.score, level = gameState.currentLevel, difficulty = "Medium"
             )
         }
 
-        GameOverDialog(
-            score = gameState.score,
+        GameOverDialog(score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             difficulty = "Medium",
