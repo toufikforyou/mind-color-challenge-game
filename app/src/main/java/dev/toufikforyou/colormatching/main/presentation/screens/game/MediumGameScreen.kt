@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.toufikforyou.colormatching.main.data.HighScoreEntry
 import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
+import dev.toufikforyou.colormatching.main.data.local.entity.GameProgress
 import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.presentation.components.AnimatedGameScore
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
@@ -36,10 +38,15 @@ import dev.toufikforyou.colormatching.main.presentation.components.GameExitDialo
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameStartButton
 import dev.toufikforyou.colormatching.main.presentation.components.GameTimeScore
+import dev.toufikforyou.colormatching.main.presentation.components.ResumeGameDialog
+import dev.toufikforyou.colormatching.main.presentation.viewmodels.GameViewModel
 import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.main.utils.generateColorPairs
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -51,29 +58,15 @@ fun MediumGameScreen(
     isSoundEnabled: Boolean,
     preferencesDataStore: PreferencesDataStore
 ) {
-    // Calculate initial time limit based on level ranges for medium difficulty
-    fun calculateTimeLimit(level: Int) = when {
-        level < 10 -> 60  // Level 1-9: 60 seconds
-        level < 20 -> 50  // Level 10-19: 50 seconds
-        level < 30 -> 45  // Level 20-29: 45 seconds
-        level < 40 -> 40  // Level 30-39: 40 seconds
-        level < 50 -> 35  // Level 40-49: 35 seconds
-        else -> 30        // Level 50+: 30 seconds
-    }
-
-    var gameState by remember {
-        mutableStateOf(
-            GameState(
-                gridSize = 4, // 4x4 grid for medium difficulty
-                timeLimit = calculateTimeLimit(1), isGameStarted = false
-            )
-        )
-    }
+    val viewModel: GameViewModel = koinViewModel { parametersOf(4, "Medium") }
+    val gameState by viewModel.gameState.collectAsState()
 
     val scope = rememberCoroutineScope()
     var showGameOverDialog by remember { mutableStateOf(false) }
     var timeLeft by remember { mutableIntStateOf(gameState.timeLimit) }
     var showInitialColors by remember { mutableStateOf(false) }
+    var showExitDialog by remember { mutableStateOf(false) }
+    var isTimerPaused by remember { mutableStateOf(false) }
 
     var mutableColorBoxes by remember {
         mutableStateOf(generateColorPairs(gameState.gridSize))
@@ -83,7 +76,7 @@ fun MediumGameScreen(
 
     // Calculate total pairs for 4x4 grid
     val totalPairs = remember(gameState.gridSize) {
-        (gameState.gridSize * gameState.gridSize) / 2  // 8 pairs for 4x4
+        (gameState.gridSize * gameState.gridSize) / 2
     }
 
     // Bonus points for quick matches
@@ -91,6 +84,35 @@ fun MediumGameScreen(
 
     // Collect high scores
     val highScores by preferencesDataStore.highScores.collectAsState(initial = emptyList())
+
+    // Add state for showing resume dialog
+    var showResumeDialog by remember { mutableStateOf(false) }
+    var savedProgress by remember { mutableStateOf<GameProgress?>(null) }
+
+    // Check for saved progress when screen opens
+    LaunchedEffect(Unit) {
+        savedProgress = viewModel.gameProgressDao.getProgress("Medium").firstOrNull()
+        if (savedProgress != null) {
+            showResumeDialog = true
+        }
+    }
+
+    // Save progress when game state changes or when leaving the screen
+    DisposableEffect(gameState) {
+        onDispose {
+            if (gameState.currentLevel > 1) {
+                scope.launch {
+                    viewModel.gameProgressDao.saveProgress(
+                        GameProgress(
+                            difficulty = "Medium",
+                            level = gameState.currentLevel,
+                            score = gameState.score
+                        )
+                    )
+                }
+            }
+        }
+    }
 
     // Handle box selection function with combo bonus
     val handleBoxSelection = { index: Int ->
@@ -108,7 +130,7 @@ fun MediumGameScreen(
                 if (mutableColorBoxes[firstIndex].color == mutableColorBoxes[secondIndex].color) {
                     scope.launch {
                         delay(300)
-                        if (isSoundEnabled) soundManager.playMatchFound() // Play match sound
+                        if (isSoundEnabled) soundManager.playMatchFound()
                         mutableColorBoxes = mutableColorBoxes.mapIndexed { i, box ->
                             if (i == firstIndex || i == secondIndex) {
                                 box.copy(isMatched = true, isSelected = false)
@@ -127,29 +149,33 @@ fun MediumGameScreen(
 
                         lastMatchTime = currentTime
                         val newMatchedPairs = gameState.matchedPairs + 1
-                        gameState = gameState.copy(
-                            matchedPairs = newMatchedPairs, score = gameState.score + bonusPoints
-                        )
+                        viewModel.updateGameState {
+                            it.copy(
+                                matchedPairs = newMatchedPairs, score = it.score + bonusPoints
+                            )
+                        }
 
                         selectedBoxes.clear()
 
                         if (newMatchedPairs == totalPairs) {
+                            if (isSoundEnabled) soundManager.playLevelComplete()
                             val nextLevel = gameState.currentLevel + 1
-                            gameState = gameState.copy(
-                                currentLevel = nextLevel,
-                                timeLimit = calculateTimeLimit(nextLevel),
-                                matchedPairs = 0,
-                                isGameStarted = false
-                            )
+                            viewModel.updateGameState {
+                                it.copy(
+                                    currentLevel = nextLevel,
+                                    timeLimit = viewModel.calculateTimeLimit(nextLevel),
+                                    matchedPairs = 0,
+                                    isGameStarted = false
+                                )
+                            }
 
                             timeLeft = gameState.timeLimit
                             mutableColorBoxes = generateColorPairs(gameState.gridSize)
                             showInitialColors = true
-
-                            if (isSoundEnabled) soundManager.playLevelComplete() // Play level complete sound
                         }
                     }
                 } else {
+                    // No match - hide cards after delay
                     scope.launch {
                         delay(500)
                         mutableColorBoxes = mutableColorBoxes.mapIndexed { i, box ->
@@ -164,10 +190,6 @@ fun MediumGameScreen(
         }
     }
 
-    // Add these state variables near other state declarations
-    var showExitDialog by remember { mutableStateOf(false) }
-    var isTimerPaused by remember { mutableStateOf(false) }
-
     // Game timer
     LaunchedEffect(gameState.isGameStarted, gameState.currentLevel, isTimerPaused) {
         if (gameState.isGameStarted && !isTimerPaused) {
@@ -175,7 +197,9 @@ fun MediumGameScreen(
                 delay(1000)
                 timeLeft--
                 if (timeLeft == 0) {
-                    gameState = gameState.copy(isGameStarted = false)
+                    viewModel.updateGameState {
+                        it.copy(isGameStarted = false)
+                    }
                     showGameOverDialog = true
                 }
             }
@@ -187,7 +211,9 @@ fun MediumGameScreen(
         if (showInitialColors) {
             delay(5000) // 5 seconds for medium mode
             showInitialColors = false
-            gameState = gameState.copy(isGameStarted = true)
+            viewModel.updateGameState {
+                it.copy(isGameStarted = true)
+            }
         }
     }
 
@@ -225,9 +251,13 @@ fun MediumGameScreen(
             highScores = highScores,
             onTryAgain = {
                 showGameOverDialog = false
-                gameState = GameState(
-                    gridSize = 4, timeLimit = calculateTimeLimit(1), isGameStarted = false
-                )
+                viewModel.updateGameState {
+                    GameState(
+                        gridSize = 4,
+                        timeLimit = viewModel.calculateTimeLimit(1),
+                        isGameStarted = false
+                    )
+                }
                 timeLeft = gameState.timeLimit
                 mutableColorBoxes = generateColorPairs(gameState.gridSize)
                 selectedBoxes.clear()
@@ -236,6 +266,37 @@ fun MediumGameScreen(
             onBack = {
                 navController.navigateUp()
             })
+    }
+
+    if (showResumeDialog && savedProgress != null) {
+        ResumeGameDialog(
+            difficulty = "Medium",
+            level = savedProgress!!.level,
+            score = savedProgress!!.score,
+            onResume = {
+                showResumeDialog = false
+                viewModel.updateGameState {
+                    it.copy(
+                        gridSize = 4,
+                        timeLimit = viewModel.calculateTimeLimit(savedProgress!!.level),
+                        isGameStarted = false,
+                        currentLevel = savedProgress!!.level,
+                        score = savedProgress!!.score
+                    )
+                }
+                timeLeft = gameState.timeLimit
+                mutableColorBoxes = generateColorPairs(gameState.gridSize)
+            },
+            onNewGame = {
+                showResumeDialog = false
+                scope.launch {
+                    viewModel.gameProgressDao.deleteProgress("Medium")
+                }
+            },
+            onDismiss = {
+                navController.navigateUp()
+            }
+        )
     }
 
     Scaffold(modifier = Modifier
