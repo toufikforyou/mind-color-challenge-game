@@ -357,7 +357,8 @@ fun MediumGameScreen(
 
     // Add auto-start LaunchedEffect
     LaunchedEffect(showGameOverDialog, showResumeDialog) {
-        if (!showGameOverDialog && !showResumeDialog) {
+        if (!showGameOverDialog && !showResumeDialog && !showExitDialog) {
+            delay(500) // Small delay to ensure dialogs are fully hidden
             showInitialColors = true
         }
     }
