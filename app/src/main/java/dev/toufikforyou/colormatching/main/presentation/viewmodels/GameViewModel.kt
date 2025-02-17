@@ -65,13 +65,15 @@ class GameViewModel(
     }
 
     suspend fun saveHighScore(score: Int, level: Int, difficulty: String) {
-        val newScore = HighScore(
-            score = score,
-            level = level,
-            difficulty = difficulty,
-            date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
-        )
-        highScoreDao.insertHighScore(newScore)
-        highScoreDao.deleteOldScores(difficulty, newScore.score)
+        if (highScoreDao.isHighScore(difficulty, score)) {
+            val newScore = HighScore(
+                score = score,
+                level = level,
+                difficulty = difficulty,
+                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            )
+            highScoreDao.insertHighScore(newScore)
+            highScoreDao.deleteOldScores(difficulty, newScore.score)
+        }
     }
 } 

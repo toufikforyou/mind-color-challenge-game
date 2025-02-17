@@ -1,9 +1,9 @@
 package dev.toufikforyou.colormatching
 
 import android.app.Application
-import dev.toufikforyou.colormatching.di.appModule
-import dev.toufikforyou.colormatching.di.dataModule
-import dev.toufikforyou.colormatching.di.viewModelModule
+import dev.toufikforyou.colormatching.main.di.appModule
+import dev.toufikforyou.colormatching.main.di.dataModule
+import dev.toufikforyou.colormatching.main.di.viewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin

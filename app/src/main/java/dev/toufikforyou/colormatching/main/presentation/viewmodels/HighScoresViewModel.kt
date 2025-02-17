@@ -6,11 +6,7 @@ import dev.toufikforyou.colormatching.main.data.local.entity.HighScore
 import kotlinx.coroutines.flow.Flow
 
 class HighScoresViewModel(
-    private val highScoreDao: HighScoreDao
+    highScoreDao: HighScoreDao
 ) : ViewModel() {
     val highScores: Flow<List<HighScore>> = highScoreDao.getAllHighScores()
-
-    fun getHighScoresByDifficulty(difficulty: String): Flow<List<HighScore>> {
-        return highScoreDao.getHighScoresByDifficulty(difficulty)
-    }
 } 

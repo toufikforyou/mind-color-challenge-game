@@ -1,5 +1,3 @@
-@file:Suppress("SameParameterValue")
-
 package dev.toufikforyou.colormatching.main.presentation.screens.home
 
 import android.annotation.SuppressLint
@@ -95,8 +93,7 @@ fun HomeScreen(
                 Spacer(modifier = Modifier.height(48.dp))
 
                 // Start Game Button (Highlighted)
-                LargeMenuButton(title = "Start Game",
-                    subtitle = "Begin your color matching journey",
+                "Begin your color matching journey".LargeMenuButton(title = "Start Game",
                     icon = Icons.Filled.PlayArrow,
                     onClick = {
                         if (isSoundEnabled) soundManager.playButtonClick()
@@ -144,8 +141,8 @@ fun HomeScreen(
 
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
-private fun LargeMenuButton(
-    title: String, subtitle: String, icon: ImageVector, onClick: () -> Unit
+private fun String.LargeMenuButton(
+    title: String, icon: ImageVector, onClick: () -> Unit
 ) {
     var isPressed by remember { mutableStateOf(false) }
     var isHovered by remember { mutableStateOf(false) }
@@ -267,7 +264,7 @@ private fun LargeMenuButton(
                         ), color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = subtitle,
+                        text = this@LargeMenuButton,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )

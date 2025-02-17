@@ -19,4 +19,7 @@ interface HighScoreDao {
 
     @Query("DELETE FROM high_scores WHERE difficulty = :difficulty AND score < :score AND id NOT IN (SELECT id FROM high_scores WHERE difficulty = :difficulty ORDER BY score DESC LIMIT 5)")
     suspend fun deleteOldScores(difficulty: String, score: Int)
-} 
+
+    @Query("SELECT COUNT(*) < 5 OR :score > (SELECT MIN(score) FROM high_scores WHERE difficulty = :difficulty) FROM high_scores WHERE difficulty = :difficulty")
+    suspend fun isHighScore(difficulty: String, score: Int): Boolean
+}

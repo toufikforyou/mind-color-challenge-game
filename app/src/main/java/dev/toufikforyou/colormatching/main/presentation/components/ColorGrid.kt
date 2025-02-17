@@ -95,19 +95,13 @@ private fun ColorBox(
     ) {
         if (isMatched) {
             Box(
-                modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxSize(0.8f), contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = R.drawable.roket_icon),
                     contentDescription = null,
                     modifier = Modifier.scale(animatedScale)
                 )
-//                Icon(
-//                    Icons.Default.CheckCircle,
-//                    contentDescription = null,
-//                    tint = Color.White,
-//                    modifier = Modifier.scale(animatedScale)
-//                )
             }
         }
     }

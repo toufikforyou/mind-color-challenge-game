@@ -1,4 +1,4 @@
-package dev.toufikforyou.colormatching.di
+package dev.toufikforyou.colormatching.main.di
 
 import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
 import dev.toufikforyou.colormatching.main.data.local.GameDatabase

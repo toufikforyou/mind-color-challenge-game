@@ -235,6 +235,7 @@ fun EasyGameScreen(
             totalPairs = totalPairs,
             difficulty = "Easy",
             level = gameState.currentLevel,
+            highScores = highScores,
             onTryAgain = {
                 showGameOverDialog = false
                 viewModel.updateGameState {
@@ -254,8 +255,7 @@ fun EasyGameScreen(
             },
             onBack = {
                 navController.navigateUp()
-            },
-            highScores = highScores
+            }
         )
     }
 
