@@ -3,6 +3,7 @@ package dev.toufikforyou.colormatching.di
 import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
 import dev.toufikforyou.colormatching.main.data.local.GameDatabase
 import dev.toufikforyou.colormatching.main.presentation.viewmodels.GameViewModel
+import dev.toufikforyou.colormatching.main.presentation.viewmodels.HighScoresViewModel
 import dev.toufikforyou.colormatching.main.utils.SoundManager
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -24,6 +25,12 @@ val viewModelModule = module {
             gameProgressDao = get(),
             initialGridSize = gridSize,
             difficulty = difficulty
+        )
+    }
+    
+    viewModel {
+        HighScoresViewModel(
+            preferencesDataStore = get()
         )
     }
 } 

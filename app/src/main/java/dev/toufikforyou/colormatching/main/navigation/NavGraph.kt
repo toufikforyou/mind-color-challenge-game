@@ -93,9 +93,7 @@ fun NavGraph(
         }
 
         composable(Screen.HighScores.route) {
-            HighScoresScreen(
-                navController = navController, preferencesDataStore = preferencesDataStore
-            )
+            HighScoresScreen(navController = navController)
         }
     }
 } 
