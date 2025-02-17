@@ -5,6 +5,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,9 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -29,7 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import dev.toufikforyou.colormatching.R
 import dev.toufikforyou.colormatching.main.domain.model.ColorBox
 import kotlinx.coroutines.delay
 
@@ -97,12 +97,17 @@ private fun ColorBox(
             Box(
                 modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.CheckCircle,
+                Image(
+                    painter = painterResource(id = R.drawable.roket_icon),
                     contentDescription = null,
-                    tint = Color.White,
                     modifier = Modifier.scale(animatedScale)
                 )
+//                Icon(
+//                    Icons.Default.CheckCircle,
+//                    contentDescription = null,
+//                    tint = Color.White,
+//                    modifier = Modifier.scale(animatedScale)
+//                )
             }
         }
     }
