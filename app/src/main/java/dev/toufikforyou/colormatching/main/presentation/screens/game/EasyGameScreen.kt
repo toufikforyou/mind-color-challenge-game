@@ -34,7 +34,6 @@ import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.presentation.components.GameExitDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
-import dev.toufikforyou.colormatching.main.presentation.components.GameStartButton
 import dev.toufikforyou.colormatching.main.presentation.components.GameTimeScore
 import dev.toufikforyou.colormatching.main.presentation.components.ResumeGameDialog
 import dev.toufikforyou.colormatching.main.presentation.viewmodels.GameViewModel
@@ -300,6 +299,13 @@ fun EasyGameScreen(
             })
     }
 
+    // Add this LaunchedEffect to auto-start the game
+    LaunchedEffect(showGameOverDialog, showResumeDialog) {
+        if (!showGameOverDialog && !showResumeDialog) {
+            showInitialColors = true
+        }
+    }
+
     Scaffold(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background),
@@ -341,12 +347,6 @@ fun EasyGameScreen(
                         handleBoxSelection(index)
                     }
                 })
-
-            if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
-                GameStartButton {
-                    showInitialColors = true
-                }
-            }
         }
 
         // Show exit confirmation dialog

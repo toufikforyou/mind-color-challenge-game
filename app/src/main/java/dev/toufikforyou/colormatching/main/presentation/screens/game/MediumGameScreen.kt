@@ -36,7 +36,6 @@ import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.presentation.components.GameExitDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
-import dev.toufikforyou.colormatching.main.presentation.components.GameStartButton
 import dev.toufikforyou.colormatching.main.presentation.components.GameTimeScore
 import dev.toufikforyou.colormatching.main.presentation.components.ResumeGameDialog
 import dev.toufikforyou.colormatching.main.presentation.viewmodels.GameViewModel
@@ -295,8 +294,7 @@ fun MediumGameScreen(
             },
             onDismiss = {
                 navController.navigateUp()
-            }
-        )
+            })
     }
 
     Scaffold(modifier = Modifier
@@ -341,12 +339,6 @@ fun MediumGameScreen(
                         handleBoxSelection(index)
                     }
                 })
-
-            if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
-                GameStartButton {
-                    showInitialColors = true
-                }
-            }
         }
     }
 
@@ -361,5 +353,12 @@ fun MediumGameScreen(
             }
             navController.navigateUp()
         })
+    }
+
+    // Add auto-start LaunchedEffect
+    LaunchedEffect(showGameOverDialog, showResumeDialog) {
+        if (!showGameOverDialog && !showResumeDialog) {
+            showInitialColors = true
+        }
     }
 }
