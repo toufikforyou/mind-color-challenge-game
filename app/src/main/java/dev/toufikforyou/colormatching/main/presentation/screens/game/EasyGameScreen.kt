@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,52 +25,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.toufikforyou.colormatching.main.data.HighScoreEntry
-import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
-import dev.toufikforyou.colormatching.main.domain.model.GameState
+import dev.toufikforyou.colormatching.main.data.local.entity.GameProgress
 import dev.toufikforyou.colormatching.main.presentation.components.AnimatedGameScore
 import dev.toufikforyou.colormatching.main.presentation.components.ColorGrid
 import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.presentation.components.GameExitDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
-import dev.toufikforyou.colormatching.main.presentation.components.GameStartButton
 import dev.toufikforyou.colormatching.main.presentation.components.GameTimeScore
+import dev.toufikforyou.colormatching.main.presentation.components.ResumeGameDialog
+import dev.toufikforyou.colormatching.main.presentation.viewmodels.GameViewModel
 import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.main.utils.generateColorPairs
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun EasyGameScreen(
-    navController: NavController,
-    soundManager: SoundManager,
-    isSoundEnabled: Boolean,
-    preferencesDataStore: PreferencesDataStore
+    navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
 ) {
-    // Calculate initial time limit based on level ranges
-    fun calculateTimeLimit(level: Int) = when {
-        level < 10 -> 20  // Level 1-9: 30 seconds
-        level < 20 -> 18  // Level 10-19: 25 seconds
-        level < 30 -> 16  // Level 20-29: 20 seconds
-        level < 40 -> 14  // Level 30-39: 18 seconds
-        level < 50 -> 12  // Level 40-49: 15 seconds
-        level < 60 -> 10  // Level 50-59: 12 seconds
-        level < 70 -> 8   // Level 60-69: 10 seconds
-        level < 80 -> 6   // Level 70-79: 8 seconds
-        else -> 4         // Level 80+: 6 seconds
-    }
+    val viewModel: GameViewModel = koinViewModel { parametersOf(3, "Easy") }
+    val gameState by viewModel.gameState.collectAsState()
 
-    var gameState by remember {
-        mutableStateOf(
-            GameState(
-                gridSize = 3, timeLimit = calculateTimeLimit(1), isGameStarted = false
-            )
-        )
-    }
+    // Add this to collect high scores
+    val highScores by viewModel.highScoreDao.getHighScoresByDifficulty("Easy")
+        .collectAsState(initial = emptyList())
 
     val scope = rememberCoroutineScope()
     var showGameOverDialog by remember { mutableStateOf(false) }
@@ -89,8 +72,34 @@ fun EasyGameScreen(
         (gameState.gridSize * gameState.gridSize) / 2
     }
 
-    // Collect high scores
-    val highScores by preferencesDataStore.highScores.collectAsState(initial = emptyList())
+    // Add state for showing resume dialog
+    var showResumeDialog by remember { mutableStateOf(false) }
+    var savedProgress by remember { mutableStateOf<GameProgress?>(null) }
+
+    // Check for saved progress when screen opens
+    LaunchedEffect(Unit) {
+        savedProgress = viewModel.gameProgressDao.getProgress("Easy").firstOrNull()
+        if (savedProgress != null) {
+            showResumeDialog = true
+        }
+    }
+
+    // Save progress when game state changes or when leaving the screen
+    DisposableEffect(gameState) {
+        onDispose {
+            if (gameState.currentLevel > 1) {
+                scope.launch {
+                    viewModel.gameProgressDao.saveProgress(
+                        GameProgress(
+                            difficulty = "Easy",
+                            level = gameState.currentLevel,
+                            score = gameState.score
+                        )
+                    )
+                }
+            }
+        }
+    }
 
     // Handle box selection function
     val handleBoxSelection = { index: Int ->
@@ -124,9 +133,11 @@ fun EasyGameScreen(
                         }
 
                         val newMatchedPairs = gameState.matchedPairs + 1
-                        gameState = gameState.copy(
-                            matchedPairs = newMatchedPairs, score = gameState.score + 10
-                        )
+                        viewModel.updateGameState {
+                            it.copy(
+                                matchedPairs = newMatchedPairs, score = it.score + 10
+                            )
+                        }
 
                         // Clear selected boxes after match
                         selectedBoxes.clear()
@@ -136,12 +147,14 @@ fun EasyGameScreen(
                             if (isSoundEnabled) soundManager.playLevelComplete()
                             val nextLevel = gameState.currentLevel + 1
                             // Prepare next level
-                            gameState = gameState.copy(
-                                currentLevel = nextLevel,
-                                timeLimit = calculateTimeLimit(nextLevel),
-                                matchedPairs = 0,
-                                isGameStarted = false
-                            )
+                            viewModel.updateGameState {
+                                it.copy(
+                                    currentLevel = nextLevel,
+                                    timeLimit = viewModel.calculateTimeLimit(nextLevel),
+                                    matchedPairs = 0,
+                                    isGameStarted = false
+                                )
+                            }
 
                             // Reset game state for new level
                             timeLeft = gameState.timeLimit
@@ -174,7 +187,9 @@ fun EasyGameScreen(
                 delay(1000)
                 timeLeft--
                 if (timeLeft == 0) {
-                    gameState = gameState.copy(isGameStarted = false)
+                    viewModel.updateGameState {
+                        it.copy(isGameStarted = false)
+                    }
                     showGameOverDialog = true
                 }
             }
@@ -186,7 +201,9 @@ fun EasyGameScreen(
         if (showInitialColors) {
             delay(3000) // 3 seconds for easy mode
             showInitialColors = false
-            gameState = gameState.copy(isGameStarted = true)
+            viewModel.updateGameState {
+                it.copy(isGameStarted = true)
+            }
         }
     }
 
@@ -202,19 +219,10 @@ fun EasyGameScreen(
 
     // Update the game over dialog section
     if (showGameOverDialog) {
-        // Create new high score entry when game is over
         LaunchedEffect(Unit) {
-            val newScore = HighScoreEntry(
-                score = gameState.score,
-                level = gameState.currentLevel,
-                difficulty = "Easy",
-                date = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            viewModel.saveHighScore(
+                score = gameState.score, level = gameState.currentLevel, difficulty = "Easy"
             )
-
-            // Only update if it's a high score
-            if (highScores.size < 10 || highScores.any { it.score <= newScore.score }) {
-                preferencesDataStore.updateHighScore(newScore)
-            }
         }
 
         GameOverDialog(score = gameState.score,
@@ -225,17 +233,60 @@ fun EasyGameScreen(
             highScores = highScores,
             onTryAgain = {
                 showGameOverDialog = false
-                gameState = GameState(
-                    gridSize = 3, timeLimit = calculateTimeLimit(1), isGameStarted = false
-                )
-                timeLeft = gameState.timeLimit
+                viewModel.updateGameState { currentState ->
+                    currentState.copy(
+                        timeLimit = viewModel.calculateTimeLimit(currentState.currentLevel),
+                        matchedPairs = 0,
+                        isGameStarted = false,
+                        score = currentState.score
+                    )
+                }
+                timeLeft = viewModel.calculateTimeLimit(gameState.currentLevel)
                 mutableColorBoxes = generateColorPairs(gameState.gridSize)
                 selectedBoxes.clear()
-                showInitialColors = false
+                showInitialColors = true
             },
             onBack = {
                 navController.navigateUp()
             })
+    }
+
+    // Add resume dialog
+    if (showResumeDialog && savedProgress != null) {
+        ResumeGameDialog(difficulty = "Easy",
+            level = savedProgress!!.level,
+            score = savedProgress!!.score,
+            onResume = {
+                showResumeDialog = false
+                viewModel.updateGameState {
+                    it.copy(
+                        gridSize = 3,
+                        timeLimit = viewModel.calculateTimeLimit(savedProgress!!.level),
+                        isGameStarted = false,
+                        currentLevel = savedProgress!!.level,
+                        score = savedProgress!!.score
+                    )
+                }
+                timeLeft = gameState.timeLimit
+                mutableColorBoxes = generateColorPairs(gameState.gridSize)
+            },
+            onNewGame = {
+                showResumeDialog = false
+                scope.launch {
+                    viewModel.gameProgressDao.deleteProgress("Easy")
+                }
+            },
+            onDismiss = {
+                navController.navigateUp()
+            })
+    }
+
+    // Add this LaunchedEffect to auto-start the game
+    LaunchedEffect(showGameOverDialog, showResumeDialog) {
+        if (!showGameOverDialog && !showResumeDialog && !showExitDialog) {
+            delay(500) // Small delay to ensure dialogs are fully hidden
+            showInitialColors = true
+        }
     }
 
     Scaffold(modifier = Modifier
@@ -279,12 +330,6 @@ fun EasyGameScreen(
                         handleBoxSelection(index)
                     }
                 })
-
-            if (!gameState.isGameStarted && !showGameOverDialog && !showInitialColors) {
-                GameStartButton {
-                    showInitialColors = true
-                }
-            }
         }
 
         // Show exit confirmation dialog

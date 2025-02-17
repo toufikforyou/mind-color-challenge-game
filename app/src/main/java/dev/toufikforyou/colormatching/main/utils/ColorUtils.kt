@@ -24,7 +24,7 @@ fun generateColorPairs(gridSize: Int): List<ColorBox> {
 
     return List(totalBoxes) { index ->
         if (index == ignoredPosition) {
-            ColorBox(color = Color.Gray)
+            ColorBox(color = Color.Transparent)
         } else {
             // For even grids, use direct index mapping
             val colorIndex = if (isEvenGrid) {

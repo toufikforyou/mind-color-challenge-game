@@ -12,25 +12,21 @@ import dev.toufikforyou.colormatching.main.data.PreferencesDataStore
 import dev.toufikforyou.colormatching.main.navigation.NavGraph
 import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.ui.theme.ColorMatchingTheme
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
-    private lateinit var preferencesDataStore: PreferencesDataStore
-    private lateinit var soundManager: SoundManager
+    private val preferencesDataStore: PreferencesDataStore by inject()
+    private val soundManager: SoundManager by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        preferencesDataStore = PreferencesDataStore(this)
-        soundManager = SoundManager(this)
 
         setContent {
             val isDarkMode by preferencesDataStore.isDarkMode.collectAsState(initial = true)
             val useSystemTheme by preferencesDataStore.useSystemTheme.collectAsState(initial = true)
-
-            // Get the system dark mode preference
             val isSystemInDarkTheme = isSystemInDarkTheme()
 
-            // Use system theme if enabled, otherwise use user preference
             val shouldUseDarkTheme = if (useSystemTheme) {
                 isSystemInDarkTheme
             } else {
