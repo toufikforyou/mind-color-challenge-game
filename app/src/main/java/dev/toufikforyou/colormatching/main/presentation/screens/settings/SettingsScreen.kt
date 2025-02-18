@@ -1,17 +1,23 @@
+@file:Suppress("SameParameterValue")
+
 package dev.toufikforyou.colormatching.main.presentation.screens.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -20,6 +26,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,17 +35,17 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
+import dev.toufikforyou.colormatching.main.presentation.viewmodels.SettingsViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SettingsScreen(
-    navController: NavController,
-    isDarkMode: Boolean,
-    isSoundEnabled: Boolean,
-    useSystemTheme: Boolean,
-    onDarkModeChanged: (Boolean) -> Unit,
-    onSoundEnabledChanged: (Boolean) -> Unit,
-    onUseSystemThemeChanged: (Boolean) -> Unit
+    navController: NavController, viewModel: SettingsViewModel = koinViewModel()
 ) {
+    val isDarkMode by viewModel.isDarkMode.collectAsState()
+    val isSoundEnabled by viewModel.isSoundEnabled.collectAsState()
+    val useSystemTheme by viewModel.useSystemTheme.collectAsState()
+
     Scaffold(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.background),
@@ -58,7 +66,7 @@ fun SettingsScreen(
                 title = "Use System Theme",
                 icon = if (useSystemTheme) Icons.Default.CheckCircle else Icons.Filled.CheckCircle,
                 isChecked = useSystemTheme,
-                onCheckedChange = onUseSystemThemeChanged
+                onCheckedChange = viewModel::updateUseSystemTheme
             )
 
             if (!useSystemTheme) {
@@ -66,7 +74,7 @@ fun SettingsScreen(
                     title = "Dark Mode",
                     icon = if (isDarkMode) Icons.Default.CheckCircle else Icons.Filled.CheckCircle,
                     isChecked = isDarkMode,
-                    onCheckedChange = onDarkModeChanged
+                    onCheckedChange = viewModel::updateDarkMode
                 )
             }
 
@@ -74,8 +82,50 @@ fun SettingsScreen(
                 title = "Sound Effects",
                 icon = if (isSoundEnabled) Icons.Default.Add else Icons.Default.AddCircle,
                 isChecked = isSoundEnabled,
-                onCheckedChange = onSoundEnabledChanged
+                onCheckedChange = viewModel::updateSoundEnabled
             )
+
+            SettingsItem(
+                title = "Notification Settings",
+                subtitle = "Configure daily reminder notifications",
+                icon = Icons.Default.Notifications,
+                onClick = viewModel::openNotificationSettings
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsItem(
+    title: String, subtitle: String, icon: ImageVector, onClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = title, style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

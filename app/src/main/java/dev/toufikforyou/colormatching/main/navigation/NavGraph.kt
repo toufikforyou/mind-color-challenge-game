@@ -3,7 +3,6 @@ package dev.toufikforyou.colormatching.main.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,7 +16,6 @@ import dev.toufikforyou.colormatching.main.presentation.screens.home.HomeScreen
 import dev.toufikforyou.colormatching.main.presentation.screens.levelselection.LevelSelectionScreen
 import dev.toufikforyou.colormatching.main.presentation.screens.settings.SettingsScreen
 import dev.toufikforyou.colormatching.main.utils.SoundManager
-import kotlinx.coroutines.launch
 
 @Composable
 fun NavGraph(
@@ -25,10 +23,7 @@ fun NavGraph(
     preferencesDataStore: PreferencesDataStore,
     soundManager: SoundManager
 ) {
-    val isDarkMode by preferencesDataStore.isDarkMode.collectAsState(initial = true)
     val isSoundEnabled by preferencesDataStore.isSoundEnabled.collectAsState(initial = true)
-    val useSystemTheme by preferencesDataStore.useSystemTheme.collectAsState(initial = true)
-    val scope = rememberCoroutineScope()
 
     NavHost(
         navController = navController, startDestination = Screen.Home.route
@@ -42,19 +37,7 @@ fun NavGraph(
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(navController = navController,
-                isDarkMode = isDarkMode,
-                isSoundEnabled = isSoundEnabled,
-                useSystemTheme = useSystemTheme,
-                onDarkModeChanged = {
-                    scope.launch { preferencesDataStore.updateDarkMode(it) }
-                },
-                onSoundEnabledChanged = {
-                    scope.launch { preferencesDataStore.updateSoundEnabled(it) }
-                },
-                onUseSystemThemeChanged = {
-                    scope.launch { preferencesDataStore.updateUseSystemTheme(it) }
-                })
+            SettingsScreen(navController = navController)
         }
 
         composable(Screen.LevelSelection.route) {

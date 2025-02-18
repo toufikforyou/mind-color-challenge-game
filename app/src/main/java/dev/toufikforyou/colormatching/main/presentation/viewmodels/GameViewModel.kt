@@ -5,6 +5,7 @@ import dev.toufikforyou.colormatching.main.data.local.dao.GameProgressDao
 import dev.toufikforyou.colormatching.main.data.local.dao.HighScoreDao
 import dev.toufikforyou.colormatching.main.data.local.entity.HighScore
 import dev.toufikforyou.colormatching.main.domain.model.GameState
+import dev.toufikforyou.colormatching.main.notification.NotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.text.SimpleDateFormat
@@ -13,6 +14,7 @@ import java.util.*
 class GameViewModel(
     val gameProgressDao: GameProgressDao,
     val highScoreDao: HighScoreDao,
+    private val notificationHelper: NotificationHelper,
     initialGridSize: Int,
     private val difficulty: String
 ) : ViewModel() {
@@ -74,6 +76,9 @@ class GameViewModel(
             )
             highScoreDao.insertHighScore(newScore)
             highScoreDao.deleteOldScores(difficulty, newScore.score)
+            
+            // Show notification for new high score
+            notificationHelper.showHighScoreNotification(score, difficulty)
         }
     }
 } 
