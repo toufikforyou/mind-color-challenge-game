@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Mind Color Challenge</string>
+    <string name="default_notification_channel_id">2233081150</string>
 </resources>
