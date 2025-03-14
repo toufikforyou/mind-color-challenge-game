@@ -61,7 +61,7 @@ jobs:
         with:
           gradlePath: app/build.gradle.kts
           versionCode: ${{ github.run_number }}
-          versionName: ${{ input.version_name }}
+          versionName: ${{ inputs.version_name }}
 
       - name: Build Release Bundle
         run: ./gradlew bundleRelease
