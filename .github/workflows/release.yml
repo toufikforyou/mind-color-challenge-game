@@ -52,8 +52,10 @@ jobs:
       - name: Create Google Play Service Account JSON file
         run: echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > app/google-services.json
 
-      - name: Create release directory
-        run: mkdir -p app/release
+      - name: Create release directories
+        run: |
+          mkdir -p app/release/aab
+          mkdir -p app/release/apk
 
       - name: Generate version name
         id: version
@@ -84,6 +86,12 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
 
+      - name: Install Android Build Tools
+        run: |
+          echo "Installing Android Build Tools 29.0.3"
+          yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;29.0.3"
+          echo "Android Build Tools 29.0.3 installed"
+
       - name: Build Release Bundle
         run: ./gradlew bundleRelease
 
@@ -91,23 +99,26 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Copy AAB to release directory
-        run: cp app/build/outputs/bundle/release/*.aab app/release/
+        run: cp app/build/outputs/bundle/release/*.aab app/release/aab/
 
-      - name: Sign Android Release Abb
-        id: sign_abb
+      - name: Copy APK to release directory
+        run: cp app/build/outputs/apk/release/*.apk app/release/apk/
+
+      - name: Sign Android AAB
+        id: sign_aab
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/release
+          releaseDirectory: app/release/aab
           signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEYSTORE }}
           alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
 
-      - name: Sign Android Release Apk
+      - name: Sign Android APK
         id: sign_apk
         uses: r0adkll/sign-android-release@v1
         with:
-          releaseDirectory: app/build/outputs/apk/release
+          releaseDirectory: app/release/apk
           signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEYSTORE }}
           alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
@@ -115,11 +126,10 @@ jobs:
 
       - name: Debug Release Files
         run: |
-          echo "SIGNED_RELEASE_FILE: ${{ env.SIGNED_RELEASE_FILE }}"
-          echo "Files in app/release:"
-          ls -la app/release/
-          echo "Files in app directory:"
-          ls -la app/
+          echo "Files in app/release/aab:"
+          ls -la app/release/aab/
+          echo "Files in app/release/apk:"
+          ls -la app/release/apk/
 
       - name: Create GitHub Release
         id: create_release
@@ -128,7 +138,7 @@ jobs:
           tag_name: v${{ steps.version.outputs.version_name }}
           name: v${{ steps.version.outputs.version_name }}
           draft: false
-          release: false
+          prerelease: false
           body: |
             Release version ${{ steps.version.outputs.version_name }}
             
@@ -138,13 +148,23 @@ jobs:
             - Year.Month: ${{ steps.version.outputs.year_month }}
             - Tag version: ${{ steps.version.outputs.tag_version }}
           files: |
-            app/release/*.aab
-            app/build/outputs/apk/release/*.apk
+            app/release/aab/*.aab
+            app/release/apk/*.apk
 
-      - name: Upload Artifact to Firebase App Distribution
+      - name: Upload AAB to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.GOOGLE_CREDENTIAL_FIREBASE }}
           groups: toufikforyou
-          file: ${{ env.SIGNED_RELEASE_FILE }}
+          file: app/release/aab/*.aab
+          releaseNotes: "Version ${{ steps.version.outputs.version_name }} (AAB)"
+
+      - name: Upload APK to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.GOOGLE_CREDENTIAL_FIREBASE }}
+          groups: toufikforyou
+          file: app/release/apk/*.apk
+          releaseNotes: "Version ${{ steps.version.outputs.version_name }} (APK)"
