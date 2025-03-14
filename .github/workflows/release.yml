@@ -86,12 +86,6 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Install Android Build Tools
-        run: |
-          echo "Installing Android Build Tools 29.0.3"
-          yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;29.0.3"
-          echo "Android Build Tools 29.0.3 installed"
-
       - name: Build Release Bundle
         run: ./gradlew bundleRelease
 
