@@ -44,17 +44,23 @@
             </intent-filter>
         </service>
 
-        <meta-data android:name="google_analytics_default_allow_analytics_storage" android:value="true" />
-        <meta-data android:name="google_analytics_default_allow_ad_storage" android:value="true" />
-        <meta-data android:name="google_analytics_default_allow_ad_user_data" android:value="true" />
-        <meta-data android:name="google_analytics_default_allow_ad_personalization_signals" android:value="true" />
-
+        <meta-data
+            android:name="google_analytics_default_allow_analytics_storage"
+            android:value="true" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_storage"
+            android:value="true" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_user_data"
+            android:value="true" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="true" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/color_matching_game_icon" />
-        <!-- Set color used with incoming notification messages. This is used when no color is set for the incoming
-             notification message. See README(https://goo.gl/6BKBk7) for more. -->
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/notification" />
@@ -63,7 +69,7 @@
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="@string/default_notification_channel_id" />
 
-        <receiver 
+        <receiver
             android:name=".main.notification.NotificationHelper$DailyReminderReceiver"
             android:exported="false" />
     </application>
