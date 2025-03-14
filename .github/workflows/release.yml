@@ -81,6 +81,9 @@ jobs:
           versionCode: ${{ github.run_number }}
           versionName: ${{ steps.version.outputs.version_name }}
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v2
+
       - name: Build Release Bundle
         run: ./gradlew bundleRelease
 
