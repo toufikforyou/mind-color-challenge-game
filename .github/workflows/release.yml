@@ -82,4 +82,6 @@ jobs:
           packageName: dev.toufikforyou.colormatching
           releaseFiles: app/app-release.aab
           track: draft
-          status: complete
+          status: completed
+          inAppUpdatePriority: 0
+          changesNotSentForReview: false
