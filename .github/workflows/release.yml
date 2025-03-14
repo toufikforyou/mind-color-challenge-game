@@ -64,6 +64,7 @@ jobs:
         run: cp app/build/outputs/bundle/release/*.aab app/release/
 
       - name: Sign Android Release
+        id: sign_app
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: app/release
@@ -71,6 +72,14 @@ jobs:
           alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
+
+      - name: Debug Release Files
+        run: |
+          echo "SIGNED_RELEASE_FILE: $SIGNED_RELEASE_FILE"
+          echo "Files in app/release:"
+          ls -la app/release/
+          echo "Files in app directory:"
+          ls -la app/
 
       - name: Setup Authorization with Google play console
         run: echo '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}' > app/app-release.json
@@ -80,7 +89,7 @@ jobs:
         with:
           serviceAccountJson: app/app-release.json
           packageName: dev.toufikforyou.colormatching
-          releaseFiles: app/app-release.aab
+          releaseFiles: ${{ env.SIGNED_RELEASE_FILE }}
           track: draft
           status: completed
           inAppUpdatePriority: 0
