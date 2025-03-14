@@ -66,14 +66,8 @@ jobs:
       - name: Build Release Bundle
         run: ./gradlew bundleRelease
 
-      - name: Build APK
-        run: ./gradlew assembleRelease
-
       - name: Copy AAB to release directory
         run: cp app/build/outputs/bundle/release/*.aab app/release/
-
-      - name: Copy APK to release directory
-        run: cp app/build/outputs/apk/release/*.apk app/release/
 
       - name: Sign Android Release
         id: sign_app
