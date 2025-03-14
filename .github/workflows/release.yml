@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew clean test
 
   build-and-deploy:
-    name: Build and Deploy to Google Play
+    name: Build and Firebase App Distribution
     needs: test
     runs-on: ubuntu-latest
     
