@@ -93,11 +93,21 @@ jobs:
       - name: Copy AAB to release directory
         run: cp app/build/outputs/bundle/release/*.aab app/release/
 
-      - name: Sign Android Release
+      - name: Sign Android Release Abb
         id: sign_app
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: app/release
+          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEYSTORE }}
+          alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
+
+      - name: Sign Android Release Apk
+        id: sign_app
+        uses: r0adkll/sign-android-release@v1
+        with:
+          releaseDirectory: app/build/outputs/apk/release
           signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEYSTORE }}
           alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
