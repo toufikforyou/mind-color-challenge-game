@@ -116,7 +116,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: v${{ steps.version.outputs.version_name }}
-          name: Release v${{ steps.version.outputs.version_name }}
+          name: v${{ steps.version.outputs.version_name }}
           draft: false
           release: false
           body: |
@@ -129,6 +129,7 @@ jobs:
             - Tag version: ${{ steps.version.outputs.tag_version }}
           files: |
             app/release/*.aab
+            app/build/outputs/apk/release/*.apk
 
       - name: Upload Artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -136,5 +137,4 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.GOOGLE_CREDENTIAL_FIREBASE }}
           groups: toufikforyou
-          file: app/release/app-release.apk
-          releaseNotes: "Version ${{ steps.version.outputs.version_name }}"
+          file: ${{ env.SIGNED_RELEASE_FILE }}
