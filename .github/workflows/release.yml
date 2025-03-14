@@ -94,7 +94,7 @@ jobs:
         run: cp app/build/outputs/bundle/release/*.aab app/release/
 
       - name: Sign Android Release Abb
-        id: sign_app
+        id: sign_abb
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: app/release
@@ -104,7 +104,7 @@ jobs:
           keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
 
       - name: Sign Android Release Apk
-        id: sign_app
+        id: sign_apk
         uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: app/build/outputs/apk/release
