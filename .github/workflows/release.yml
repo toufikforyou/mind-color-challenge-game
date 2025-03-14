@@ -1,4 +1,4 @@
-name: Release to Google Play
+name: Release to Firebase App Distribution
 
 on:
   workflow_dispatch:
