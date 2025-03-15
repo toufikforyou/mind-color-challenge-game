@@ -90,24 +90,6 @@ jobs:
       - name: Copy APK to release directory
         run: cp app/build/outputs/apk/release/*.apk app/release/
 
-#      - name: Sign Android Release
-#        id: sign_apk
-#        uses: r0adkll/sign-android-release@v1
-#        with:
-#          releaseDirectory: app/release
-#          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEYSTORE }}
-#          alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
-#          keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
-#          keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
-
-      - name: Debug Release Files
-        run: |
-          echo "SIGNED_RELEASE_FILE: ${{ env.SIGNED_RELEASE_FILE }}"
-          echo "Files in app/release:"
-          ls -la app/release/
-          echo "Files in app directory:"
-          ls -la app/
-
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -125,7 +107,7 @@ jobs:
             - Year.Month: ${{ steps.version.outputs.year_month }}
             - Tag version: ${{ steps.version.outputs.tag_version }}
           files: |
-            ${{ env.SIGNED_RELEASE_FILE }}
+            app/release/*.apk
 
   build-and-deploy-to-firebase:
     name: Build and Firebase Distribution
