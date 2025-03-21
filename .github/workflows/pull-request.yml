@@ -3,35 +3,12 @@ name: Pull Request Checks
 on:
   pull_request:
     branches: [main]
-    types: [opened, synchronize, reopened]
 
 jobs:
-  block_merge:
-    name: Block Merge Button
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      statuses: write
-      contents: read
-    steps:
-      - name: Disable Merge Button
-        uses: actions/github-script@v7
-        with:
-          script: |
-            // Set a required status check to pending, which will block merging
-            await github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: context.payload.pull_request.head.sha,
-              state: 'pending',
-              context: 'required-checks',
-              description: 'Waiting for all checks to complete'
-            });
-
   verify:
     name: Verify Build & Tests
-    needs: block_merge
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -56,57 +33,3 @@ jobs:
 
       - name: Verify release build
         run: ./gradlew bundleRelease
-
-  update_status:
-    name: Update Merge Status
-    needs: verify
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      statuses: write
-      contents: read
-    steps:
-      - name: Check job status
-        id: check_status
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { jobs } = await github.rest.actions.listJobsForWorkflowRun({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              run_id: context.runId
-            });
-            
-            const verifyJob = jobs.find(job => job.name === 'Verify Build & Tests');
-            const jobStatus = verifyJob ? verifyJob.conclusion : 'failure';
-            
-            return jobStatus;
-          result-encoding: string
-
-      - name: Enable Merge Button
-        if: steps.check_status.outputs.result == 'success'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: context.payload.pull_request.head.sha,
-              state: 'success',
-              context: 'required-checks',
-              description: 'All checks passed!'
-            });
-
-      - name: Keep Merge Button Disabled
-        if: steps.check_status.outputs.result != 'success'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: context.payload.pull_request.head.sha,
-              state: 'failure',
-              context: 'required-checks',
-              description: 'Some checks failed. Please fix the issues before merging.'
-            });
