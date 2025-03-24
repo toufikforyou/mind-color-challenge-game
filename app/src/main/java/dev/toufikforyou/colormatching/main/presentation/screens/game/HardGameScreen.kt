@@ -140,9 +140,9 @@ fun HardGameScreen(
                         // Calculate bonus points based on streak and time
                         val streakBonus = currentStreak * 5
                         val timeBonus = when {
-                            timeDiff < 1500 -> 20 // Super quick match
-                            timeDiff < 2500 -> 15 // Quick match
-                            timeDiff < 3500 -> 10 // Medium speed
+                            timeDiff < 1500 -> 3 // Super quick match
+                            timeDiff < 2500 -> 2 // Quick match
+                            timeDiff < 3500 -> 1 // Medium speed
                             else -> 5             // Base points
                         }
 
@@ -165,7 +165,8 @@ fun HardGameScreen(
                                     currentLevel = nextLevel,
                                     timeLimit = viewModel.calculateTimeLimit(nextLevel),
                                     matchedPairs = 0,
-                                    isGameStarted = false
+                                    isGameStarted = false,
+                                    score = it.score + 10
                                 )
                             }
 
@@ -235,7 +236,8 @@ fun HardGameScreen(
             )
         }
 
-        GameOverDialog(score = gameState.score,
+        GameOverDialog(
+            score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             difficulty = "Hard",
@@ -276,7 +278,8 @@ fun HardGameScreen(
     }
 
     if (showResumeDialog && savedProgress != null) {
-        ResumeGameDialog(difficulty = "Hard",
+        ResumeGameDialog(
+            difficulty = "Hard",
             level = savedProgress!!.level,
             score = savedProgress!!.score,
             onResume = {
@@ -313,9 +316,10 @@ fun HardGameScreen(
         }
     }
 
-    Scaffold(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background),
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         topBar = {
             GameAppBar(title = "Hard Level ${gameState.currentLevel}") {
                 if (gameState.isGameStarted) {
@@ -346,7 +350,8 @@ fun HardGameScreen(
             }
 
             // Color grid with smaller padding for 5x5
-            ColorGrid(gridSize = gameState.gridSize,
+            ColorGrid(
+                gridSize = gameState.gridSize,
                 colorBoxes = mutableColorBoxes,
                 showInitialColors = showInitialColors,
                 onBoxClick = { index ->

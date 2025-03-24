@@ -1,6 +1,7 @@
 package dev.toufikforyou.colormatching.main.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.toufikforyou.colormatching.main.data.local.dao.GameProgressDao
 import dev.toufikforyou.colormatching.main.data.local.dao.HighScoreDao
 import dev.toufikforyou.colormatching.main.data.local.entity.HighScore
@@ -8,8 +9,11 @@ import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.notification.NotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class GameViewModel(
     val gameProgressDao: GameProgressDao,
@@ -27,6 +31,15 @@ class GameViewModel(
 
     fun updateGameState(update: (GameState) -> GameState) {
         _gameState.value = update(_gameState.value)
+        if (!_gameState.value.isGameStarted) {  // Only save high score when game is over
+            viewModelScope.launch {
+                saveHighScore(
+                    score = _gameState.value.score,
+                    level = _gameState.value.currentLevel,
+                    difficulty = difficulty
+                )
+            }
+        }
     }
 
     fun calculateTimeLimit(level: Int): Int {
@@ -67,7 +80,10 @@ class GameViewModel(
     }
 
     suspend fun saveHighScore(score: Int, level: Int, difficulty: String) {
-        if (highScoreDao.isHighScore(difficulty, score)) {
+        val currentHighScore = highScoreDao.getHighScoresByDifficulty(difficulty).firstOrNull()
+            ?.maxByOrNull { it.score }?.score ?: 0
+
+        if (score > currentHighScore) {
             val newScore = HighScore(
                 score = score,
                 level = level,
@@ -76,9 +92,6 @@ class GameViewModel(
             )
             highScoreDao.insertHighScore(newScore)
             highScoreDao.deleteOldScores(difficulty, newScore.score)
-            
-            // Show notification for new high score
-            notificationHelper.showHighScoreNotification(score, difficulty)
         }
     }
-} 
+}

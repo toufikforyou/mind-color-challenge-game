@@ -56,16 +56,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import dev.toufikforyou.colormatching.BuildConfig
 import dev.toufikforyou.colormatching.R
 import dev.toufikforyou.colormatching.main.navigation.Screen
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.utils.SoundManager
+import dev.toufikforyou.colormatching.main.utils.WindowSize
+import dev.toufikforyou.colormatching.main.utils.rememberWindowSize
 
 @Composable
 fun HomeScreen(
     navController: NavController, soundManager: SoundManager, isSoundEnabled: Boolean
 ) {
+    val windowSize = rememberWindowSize()
     val scrollState = rememberScrollState()
 
     Scaffold { padding ->
@@ -75,66 +77,112 @@ fun HomeScreen(
         ) {
             GameBackground()
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(padding)
-                    .verticalScroll(scrollState),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+            when (windowSize) {
+                WindowSize.Compact -> {
+                    // Vertical layout for phones
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(padding)
+                            .verticalScroll(scrollState),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.color_matching_game_icon),
+                            contentDescription = "Game Logo",
+                            modifier = Modifier.size(160.dp)
+                        )
 
-                // Replace old AnimatedLogo with new animated logo
-                Image(
-                    painter = painterResource(id = R.drawable.color_matching_game_icon),
-                    contentDescription = "Game Logo",
-                    modifier = Modifier.size(200.dp)
-                )
+                        Spacer(modifier = Modifier.height(48.dp))
 
-                Spacer(modifier = Modifier.height(48.dp))
-
-                // Start Game Button (Highlighted)
-                "Begin your color matching journey".LargeMenuButton(title = "Start Game",
-                    icon = Icons.Filled.PlayArrow,
-                    onClick = {
-                        if (isSoundEnabled) soundManager.playButtonClick()
-                        navController.navigate(Screen.LevelSelection.route)
-                    })
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Other Menu Items in a Row
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    SmallMenuButton(icon = Icons.Filled.MailOutline, label = "Scores", onClick = {
-                        if (isSoundEnabled) soundManager.playButtonClick()
-                        navController.navigate(Screen.HighScores.route)
-                    })
-
-                    SmallMenuButton(icon = Icons.Filled.Settings, label = "Settings", onClick = {
-                        if (isSoundEnabled) soundManager.playButtonClick()
-                        navController.navigate(Screen.Settings.route)
-                    })
-
-                    SmallMenuButton(icon = Icons.Filled.Info, label = "Guide", onClick = {
-                        if (isSoundEnabled) soundManager.playButtonClick()
-                        navController.navigate(Screen.Guide.route)
-                    })
+                        MenuButtons(
+                            navController = navController,
+                            soundManager = soundManager,
+                            isSoundEnabled = isSoundEnabled
+                        )
+                    }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                else -> {
+                    // Horizontal layout for tablets and desktop
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding)
+                            .padding(horizontal = 32.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.color_matching_game_icon),
+                            contentDescription = "Game Logo",
+                            modifier = Modifier.size(
+                                when (windowSize) {
+                                    WindowSize.Medium -> 200.dp
+                                    else -> 240.dp
+                                }
+                            )
+                        )
 
-                Text(
-                    text = "v${BuildConfig.VERSION_NAME}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
+                        MenuButtons(
+                            navController = navController,
+                            soundManager = soundManager,
+                            isSoundEnabled = isSoundEnabled,
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 32.dp)
+                        )
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun MenuButtons(
+    navController: NavController,
+    soundManager: SoundManager,
+    isSoundEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // Start Game Button
+        "Begin your color matching journey".LargeMenuButton(
+            title = "Start Game", icon = Icons.Filled.PlayArrow, onClick = {
+                if (isSoundEnabled) soundManager.playButtonClick()
+                navController.navigate(Screen.LevelSelection.route)
+            })
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Other Menu Items
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            SmallMenuButton(
+                icon = Icons.Filled.MailOutline, label = "Scores", onClick = {
+                    if (isSoundEnabled) soundManager.playButtonClick()
+                    navController.navigate(Screen.HighScores.route)
+                })
+
+            SmallMenuButton(
+                icon = Icons.Filled.Settings, label = "Settings", onClick = {
+                    if (isSoundEnabled) soundManager.playButtonClick()
+                    navController.navigate(Screen.Settings.route)
+                })
+
+            SmallMenuButton(
+                icon = Icons.Filled.Info, label = "Guide", onClick = {
+                    if (isSoundEnabled) soundManager.playButtonClick()
+                    navController.navigate(Screen.Guide.route)
+                })
         }
     }
 }
@@ -201,25 +249,26 @@ private fun String.LargeMenuButton(
         )
     )
 
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 32.dp, vertical = 8.dp)
-        .height(120.dp)
-        .scale(scale * pulseScale)
-        .offset(y = floatOffset.dp)
-        .pointerInput(Unit) {
-            awaitPointerEventScope {
-                while (true) {
-                    val event = awaitPointerEvent()
-                    when (event.type) {
-                        PointerEventType.Enter -> isHovered = true
-                        PointerEventType.Exit -> isHovered = false
-                        else -> { /* do nothing */
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.dp, vertical = 8.dp)
+            .height(120.dp)
+            .scale(scale * pulseScale)
+            .offset(y = floatOffset.dp)
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        when (event.type) {
+                            PointerEventType.Enter -> isHovered = true
+                            PointerEventType.Exit -> isHovered = false
+                            else -> { /* do nothing */
+                            }
                         }
                     }
                 }
-            }
-        }) {
+            }) {
         // Background glow effect
         Card(
             modifier = Modifier
