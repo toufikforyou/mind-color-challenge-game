@@ -16,8 +16,8 @@ android {
         applicationId = "dev.toufikforyou.colormatching"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "25.03.1.23"
+        versionCode = 6
+        versionName = "25.03.1.24"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
