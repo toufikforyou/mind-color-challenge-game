@@ -55,69 +55,131 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import dev.toufikforyou.colormatching.main.navigation.Screen
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
+import dev.toufikforyou.colormatching.main.utils.WindowSize
+import dev.toufikforyou.colormatching.main.utils.rememberWindowSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LevelSelectionScreen(navController: NavController) {
-    Scaffold(modifier = Modifier
-        .fillMaxSize()
-        .background(
-            MaterialTheme.colorScheme.background
-        ), topBar = {
-        TopAppBar(title = {
-            Text(
-                "Select Difficulty", style = MaterialTheme.typography.titleLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
+    val windowSize = rememberWindowSize()
+
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.background
+            ), topBar = {
+            TopAppBar(title = {
+                Text(
+                    "Select Difficulty", style = MaterialTheme.typography.titleLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
                 )
+            }, navigationIcon = {
+                IconButton(onClick = { navController.navigateUp() }) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ArrowBack,
+                        "Back",
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }, colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = Color.Transparent
             )
-        }, navigationIcon = {
-            IconButton(onClick = { navController.navigateUp() }) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    "Back",
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }, colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent
-        )
-        )
-    }) { paddingValues ->
+            )
+        }) { paddingValues ->
         GameBackground()
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            DifficultyButton(text = "Easy",
-                description = "3x3 Grid",
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                onClick = { navController.navigate(Screen.Game.Easy.route) })
 
-            Spacer(modifier = Modifier.height(24.dp))
-
-            DifficultyButton(text = "Medium",
-                description = "4x4 Grid",
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                onClick = { navController.navigate(Screen.Game.Medium.route) })
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            DifficultyButton(text = "Hard",
-                description = "5x5 Grid",
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                onClick = { navController.navigate(Screen.Game.Hard.route) })
+        when (windowSize) {
+            WindowSize.Compact -> {
+                // Vertical layout for phones
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    DifficultyButtons(navController)
+                }
+            }
+            else -> {
+                // Horizontal layout for tablets and desktop
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 32.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    DifficultyButton(
+                        text = "Easy",
+                        description = "3x3 Grid",
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        onClick = { navController.navigate(Screen.Game.Easy.route) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    DifficultyButton(
+                        text = "Medium",
+                        description = "4x4 Grid",
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        onClick = { navController.navigate(Screen.Game.Medium.route) },
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    DifficultyButton(
+                        text = "Hard",
+                        description = "5x5 Grid",
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        onClick = { navController.navigate(Screen.Game.Hard.route) },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun DifficultyButtons(navController: NavController) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        DifficultyButton(
+            text = "Easy",
+            description = "3x3 Grid",
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            onClick = { navController.navigate(Screen.Game.Easy.route) }
+        )
+
+        DifficultyButton(
+            text = "Medium",
+            description = "4x4 Grid",
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            onClick = { navController.navigate(Screen.Game.Medium.route) }
+        )
+
+        DifficultyButton(
+            text = "Hard",
+            description = "5x5 Grid",
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            onClick = { navController.navigate(Screen.Game.Hard.route) }
+        )
     }
 }
 
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 private fun DifficultyButton(
-    text: String, description: String, containerColor: Color, onClick: () -> Unit
+    text: String,
+    description: String,
+    containerColor: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var isPressed by remember { mutableStateOf(false) }
     var isHovered by remember { mutableStateOf(false) }
@@ -148,23 +210,30 @@ private fun DifficultyButton(
         )
     )
 
-    Box(modifier = Modifier
-        .width(280.dp)
-        .offset(y = floatOffset.dp)
-        .scale(scale)
-        .pointerInput(Unit) {
-            awaitPointerEventScope {
-                while (true) {
-                    val event = awaitPointerEvent()
-                    when (event.type) {
-                        PointerEventType.Enter -> isHovered = true
-                        PointerEventType.Exit -> isHovered = false
-                        else -> { /* do nothing */
+    Box(
+        modifier = modifier
+            .then(
+                if (rememberWindowSize() == WindowSize.Compact) {
+                    Modifier.width(280.dp)
+                } else {
+                    Modifier
+                }
+            )
+            .offset(y = floatOffset.dp)
+            .scale(scale)
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        when (event.type) {
+                            PointerEventType.Enter -> isHovered = true
+                            PointerEventType.Exit -> isHovered = false
+                            else -> { /* do nothing */
+                            }
                         }
                     }
                 }
-            }
-        }) {
+            }) {
         // Glow effect
         Surface(
             modifier = Modifier
