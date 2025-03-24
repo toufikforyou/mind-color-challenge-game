@@ -9,9 +9,11 @@ import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.notification.NotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class GameViewModel(
     val gameProgressDao: GameProgressDao,
@@ -78,7 +80,10 @@ class GameViewModel(
     }
 
     suspend fun saveHighScore(score: Int, level: Int, difficulty: String) {
-        if (highScoreDao.isHighScore(difficulty, score)) {
+        val currentHighScore = highScoreDao.getHighScoresByDifficulty(difficulty).firstOrNull()
+            ?.maxByOrNull { it.score }?.score ?: 0
+
+        if (score > currentHighScore) {
             val newScore = HighScore(
                 score = score,
                 level = level,
