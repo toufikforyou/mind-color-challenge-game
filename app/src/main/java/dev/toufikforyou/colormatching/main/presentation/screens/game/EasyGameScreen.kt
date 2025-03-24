@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +67,9 @@ fun EasyGameScreen(
     }
 
     val selectedBoxes = remember { mutableStateListOf<Int>() }
+
+    // Bonus points for quick matches
+    var lastMatchTime by remember { mutableLongStateOf(0L) }
 
     // Calculate total pairs for current grid size
     val totalPairs = remember(gameState.gridSize) {
@@ -132,10 +136,21 @@ fun EasyGameScreen(
                             }
                         }
 
+                        val currentTime = System.currentTimeMillis()
+                        val timeDiff = currentTime - lastMatchTime
+
+                        val bonusPoints = when {
+                            timeDiff < 1000 -> 10 // Quick match bonus
+                            timeDiff < 2000 -> 7 // Medium speed bonus
+                            else -> 5            // Base points
+                        }
+
+                        lastMatchTime = currentTime
+
                         val newMatchedPairs = gameState.matchedPairs + 1
                         viewModel.updateGameState {
                             it.copy(
-                                matchedPairs = newMatchedPairs, score = it.score + 10
+                                matchedPairs = newMatchedPairs, score = it.score + bonusPoints
                             )
                         }
 
@@ -146,17 +161,16 @@ fun EasyGameScreen(
                         if (newMatchedPairs == totalPairs) {
                             if (isSoundEnabled) soundManager.playLevelComplete()
                             val nextLevel = gameState.currentLevel + 1
-                            // Prepare next level
                             viewModel.updateGameState {
                                 it.copy(
                                     currentLevel = nextLevel,
                                     timeLimit = viewModel.calculateTimeLimit(nextLevel),
                                     matchedPairs = 0,
-                                    isGameStarted = false
+                                    isGameStarted = false,
+                                    score = it.score + 5
                                 )
                             }
 
-                            // Reset game state for new level
                             timeLeft = gameState.timeLimit
                             mutableColorBoxes = generateColorPairs(gameState.gridSize)
                             showInitialColors = true
@@ -225,7 +239,8 @@ fun EasyGameScreen(
             )
         }
 
-        GameOverDialog(score = gameState.score,
+        GameOverDialog(
+            score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             difficulty = "Easy",
@@ -253,7 +268,8 @@ fun EasyGameScreen(
 
     // Add resume dialog
     if (showResumeDialog && savedProgress != null) {
-        ResumeGameDialog(difficulty = "Easy",
+        ResumeGameDialog(
+            difficulty = "Easy",
             level = savedProgress!!.level,
             score = savedProgress!!.score,
             onResume = {
@@ -289,9 +305,10 @@ fun EasyGameScreen(
         }
     }
 
-    Scaffold(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background),
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         topBar = {
             GameAppBar(title = "Easy Level ${gameState.currentLevel}") {
                 if (gameState.isGameStarted) {
@@ -322,7 +339,8 @@ fun EasyGameScreen(
             }
 
             // Color grid
-            ColorGrid(gridSize = gameState.gridSize,
+            ColorGrid(
+                gridSize = gameState.gridSize,
                 colorBoxes = mutableColorBoxes,
                 showInitialColors = showInitialColors,
                 onBoxClick = { index ->

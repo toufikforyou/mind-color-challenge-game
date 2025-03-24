@@ -156,7 +156,8 @@ fun MediumGameScreen(
                                     currentLevel = nextLevel,
                                     timeLimit = viewModel.calculateTimeLimit(nextLevel),
                                     matchedPairs = 0,
-                                    isGameStarted = false
+                                    isGameStarted = false,
+                                    score = it.score + 5
                                 )
                             }
 
@@ -225,7 +226,8 @@ fun MediumGameScreen(
             )
         }
 
-        GameOverDialog(score = gameState.score,
+        GameOverDialog(
+            score = gameState.score,
             matchedPairs = gameState.matchedPairs,
             totalPairs = totalPairs,
             difficulty = "Medium",
@@ -252,7 +254,8 @@ fun MediumGameScreen(
     }
 
     if (showResumeDialog && savedProgress != null) {
-        ResumeGameDialog(difficulty = "Medium",
+        ResumeGameDialog(
+            difficulty = "Medium",
             level = savedProgress!!.level,
             score = savedProgress!!.score,
             onResume = {
@@ -280,20 +283,21 @@ fun MediumGameScreen(
             })
     }
 
-    Scaffold(modifier = Modifier
-        .fillMaxSize()
-        .background(
-            MaterialTheme.colorScheme.background
-        ), topBar = {
-        GameAppBar(title = "Medium Level ${gameState.currentLevel}") {
-            if (gameState.isGameStarted) {
-                showExitDialog = true
-                isTimerPaused = true
-            } else {
-                navController.navigateUp()
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                MaterialTheme.colorScheme.background
+            ), topBar = {
+            GameAppBar(title = "Medium Level ${gameState.currentLevel}") {
+                if (gameState.isGameStarted) {
+                    showExitDialog = true
+                    isTimerPaused = true
+                } else {
+                    navController.navigateUp()
+                }
             }
-        }
-    }) { padding ->
+        }) { padding ->
         GameBackground()
         Column(
             modifier = Modifier
@@ -314,7 +318,8 @@ fun MediumGameScreen(
             }
 
             // Color grid with smaller padding for 4x4
-            ColorGrid(gridSize = gameState.gridSize,
+            ColorGrid(
+                gridSize = gameState.gridSize,
                 colorBoxes = mutableColorBoxes,
                 showInitialColors = showInitialColors,
                 onBoxClick = { index ->

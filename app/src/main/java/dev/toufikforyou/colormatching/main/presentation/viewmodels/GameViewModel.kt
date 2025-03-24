@@ -1,6 +1,7 @@
 package dev.toufikforyou.colormatching.main.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dev.toufikforyou.colormatching.main.data.local.dao.GameProgressDao
 import dev.toufikforyou.colormatching.main.data.local.dao.HighScoreDao
 import dev.toufikforyou.colormatching.main.data.local.entity.HighScore
@@ -8,6 +9,7 @@ import dev.toufikforyou.colormatching.main.domain.model.GameState
 import dev.toufikforyou.colormatching.main.notification.NotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,6 +29,15 @@ class GameViewModel(
 
     fun updateGameState(update: (GameState) -> GameState) {
         _gameState.value = update(_gameState.value)
+        if (!_gameState.value.isGameStarted) {  // Only save high score when game is over
+            viewModelScope.launch {
+                saveHighScore(
+                    score = _gameState.value.score,
+                    level = _gameState.value.currentLevel,
+                    difficulty = difficulty
+                )
+            }
+        }
     }
 
     fun calculateTimeLimit(level: Int): Int {
@@ -76,9 +87,6 @@ class GameViewModel(
             )
             highScoreDao.insertHighScore(newScore)
             highScoreDao.deleteOldScores(difficulty, newScore.score)
-            
-            // Show notification for new high score
-            notificationHelper.showHighScoreNotification(score, difficulty)
         }
     }
-} 
+}
