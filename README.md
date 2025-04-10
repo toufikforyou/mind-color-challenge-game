@@ -67,7 +67,7 @@ A beautiful and engaging color matching memory game built with Jetpack Compose. 
 
 ## 🚀 Latest Release
 
-### Version 1.0.0
+### Version v25.03.1.24
 
 - Initial release
 - Three difficulty levels
@@ -100,10 +100,10 @@ Sound effects from [Source]
 
 For support, feedback, or suggestions:
 
-- Email: your.email@example.com
+- Email: hello@toufikforyou.dev
 - Twitter: [@toufikforyou](https://twitter.com/toufikforyou)
 - Website: [toufikforyou.dev](https://toufikforyou.dev)
 
 ## 📃 License
 
-Copyright © 2024 MH TOUFIK. All rights reserved.
+Copyright © 2025 MH TOUFIK. All rights reserved.
