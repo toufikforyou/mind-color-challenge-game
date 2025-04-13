@@ -1,6 +1,6 @@
 # 🎮 Color Matching Game
 
-[![Release](https://img.shields.io/badge/Release-v25.03.1.24-blue.svg)](https://github.com/toufikforyou/ColorMatchingGame/releases/tag/v25.03.1.24)
+[![Release](https://img.shields.io/badge/Release-v25.03.1.24-blue.svg)](https://github.com/toufikforyou/ColorMatchingGame/releases/latest)
 
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com)
 
@@ -9,6 +9,11 @@
 A beautiful and engaging color matching memory game built with Jetpack Compose. Test your memory and color recognition skills while enjoying smooth animations and dynamic gameplay!
 
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" width="200">](https://play.google.com/store/apps/details?id=dev.toufikforyou.colormatching)
+
+## 📥 Download
+
+Get it on the Google Play Store:
+[Download Color Matching Game](https://github.com/toufikforyou/ColorMatchingGame/releases/latest)
 
 ## ✨ Features
 
@@ -75,11 +80,6 @@ A beautiful and engaging color matching memory game built with Jetpack Compose. 
 - Sound effects
 - Theme support
 - Progress saving
-
-## 📥 Download
-
-Get it on the Google Play Store:
-[Download Color Matching Game](https://play.google.com/store/apps/details?id=dev.toufikforyou.colormatching)
 
 ## 📝 Privacy Policy
 
