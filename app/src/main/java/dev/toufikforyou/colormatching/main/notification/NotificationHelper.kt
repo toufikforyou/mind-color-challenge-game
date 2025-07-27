@@ -70,14 +70,6 @@ class NotificationHelper(
         )
     }
 
-    fun showHighScoreNotification(score: Int, difficulty: String) {
-        showGameNotification(
-            "New High Score!",
-            "Congratulations! You achieved $score points in $difficulty mode!",
-            GAME_CHANNEL_ID
-        )
-    }
-
     fun scheduleDailyReminder(hour: Int, minute: Int) {
         // Check all required permissions
         if (!permissionHandler.hasRequiredPermissions()) {

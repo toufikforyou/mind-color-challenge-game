@@ -6,5 +6,5 @@ plugins {
     alias(libs.plugins.google.firebase.crashlysics) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.ksp) apply false
-    kotlin("plugin.serialization") version libs.versions.plaginSerialization
+    alias(libs.plugins.kotlin.serialization) apply false
 }

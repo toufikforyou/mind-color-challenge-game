@@ -9,7 +9,7 @@ import dev.toufikforyou.colormatching.main.utils.SoundManager
 import dev.toufikforyou.colormatching.main.notification.NotificationHelper
 import dev.toufikforyou.colormatching.main.notification.NotificationPermissionHandler
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.*
 import org.koin.dsl.module
 
 val appModule = module {
