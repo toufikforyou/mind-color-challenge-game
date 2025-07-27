@@ -1,7 +1,8 @@
-name: Release to Firebase App Distribution
+name: Release to GitHub and Firebase release
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [main]
 
 jobs:
   test:
@@ -172,6 +173,12 @@ jobs:
 
       - name: Copy AAB to release directory
         run: cp app/build/outputs/bundle/release/*.aab app/release/
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      - name: Copy APK to release directory
+        run: cp app/build/outputs/apk/release/*.apk app/release/
 
       - name: Sign Android Release
         id: sign_abb
