@@ -5,17 +5,17 @@ plugins {
     alias(libs.plugins.google.firebase.crashlysics)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
     namespace = "dev.toufikforyou.colormatching"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "dev.toufikforyou.colormatching"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 6
         versionName = "25.03.1.24"
 
