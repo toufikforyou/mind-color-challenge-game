@@ -56,24 +56,57 @@ jobs:
       - name: Create release directory
         run: mkdir -p app/release
 
+      - name: Generate version name
+        id: version
+        run: |
+          # Get the current year and month in YY.MM format
+          YEAR_MONTH=$(date +'%y.%m')
+          
+          # Count number of tags that start with the current YY.MM
+          TAG_COUNT=$(git tag -l "$YEAR_MONTH.*" | wc -l)
+          # Increment tag count by 1 (or set to 1 if no matching tags exist)
+          TAG_VERSION=$((TAG_COUNT + 1))
+          
+          # Create version name in format YY.MM.TAG.VERSION_CODE
+          VERSION_NAME="${YEAR_MONTH}.${TAG_VERSION}.${{ github.run_number }}"
+          
+          echo "year_month=$YEAR_MONTH" >> $GITHUB_OUTPUT
+          echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "Version name: $VERSION_NAME"
+
+      - name: Version Bump
+        uses: chkfung/android-version-actions@v1.2.3
+        with:
+          gradlePath: app/build.gradle.kts
+          versionCode: ${{ github.run_number }}
+          versionName: ${{ steps.version.outputs.version_name }}
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
 
-      - name: Build Release Bundle (AAB)
-        run: ./gradlew bundleRelease
+      - name: Build Release Application (APK)
+        run: ./gradlew assembleRelease
 
       - name: Copy AAB to release directory
-        run: cp app/build/outputs/bundle/release/*.aab app/release
+        run: cp app/build/outputs/apk/release/*.apk app/release/apk/app-release.apk
 
-      - name: Sign Android Release (AAB)
+      - name: Install Android Build Tools 29.0.3
+        run: sdkmanager "build-tools;29.0.3"
+
+      - name: Sign Android Release (APK)
         uses: r0adkll/sign-android-release@v1
-        id: sign_abb
+        id: sign_app
         with:
           releaseDirectory: app/release
           signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEYSTORE }}
           alias: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS }}
           keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
+
+      - name: Copy signed apk and abb to release directory
+        run: |
+          cp app/release/app-release-signed.apk app/release/app-firebase-release.apk
 
       - name: Debug Release Files
         run: |
@@ -89,4 +122,4 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.GOOGLE_CREDENTIAL_FIREBASE }}
           groups: toufikforyou
-          file: ${{ env.SIGNED_RELEASE_FILE }}
+          file: app/release/app-firebase-release.apk

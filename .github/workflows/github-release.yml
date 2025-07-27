@@ -59,6 +59,32 @@ jobs:
       - name: Create Release Directory (ABB)
         run: mkdir -p app/release/abb
 
+      - name: Generate version name
+        id: version
+        run: |
+          # Get the current year and month in YY.MM format
+          YEAR_MONTH=$(date +'%y.%m')
+
+          # Count number of tags that start with the current YY.MM
+          TAG_COUNT=$(git tag -l "$YEAR_MONTH.*" | wc -l)
+          # Increment tag count by 1 (or set to 1 if no matching tags exist)
+          TAG_VERSION=$((TAG_COUNT + 1))
+
+          # Create version name in format YY.MM.TAG.VERSION_CODE
+          VERSION_NAME="${YEAR_MONTH}.${TAG_VERSION}.${{ github.run_number }}"
+
+          echo "year_month=$YEAR_MONTH" >> $GITHUB_OUTPUT
+          echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "Version name: $VERSION_NAME"
+
+      - name: Version Bump
+        uses: chkfung/android-version-actions@v1.2.3
+        with:
+          gradlePath: app/build.gradle.kts
+          versionCode: ${{ github.run_number }}
+          versionName: ${{ steps.version.outputs.version_name }}
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
 
@@ -97,42 +123,21 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
 
+      - name: Copy signed apk and abb to release directory
+        run: |
+          cp app/release/apk/app-release-signed.apk app/release/app-release.apk
+          cp ${{ steps.sign_abb.outputs.signedReleaseFile }} app/release/app-release.aab
+
       - name: Debug Release Files
         run: |
-          echo "SIGNED_RELEASE_FILE: ${{ steps.sign_abb.outputs.signedReleaseFile }}"
-          echo "SIGNED_RELEASE_FILE: ${{ steps.sign_app.outputs.signedReleaseFile }}"
+          echo "SIGNED_RELEASE_FILE: app/release/app-release.abb"
+          echo "SIGNED_RELEASE_FILE: app/release/app-release.apk"
           echo "Files in app/release/abb:"
-          echo "Files in app/release/apk:"
           ls -la app/release/apk/
           ls -la app/release/abb/
+          ls -la app/release/
           echo "Files in app directory:"
           ls -la app/
-
-      - name: Generate version name
-        id: version
-        run: |
-          # Get the current year and month in YY.MM format
-          YEAR_MONTH=$(date +'%y.%m')
-          
-          # Count number of tags that start with the current YY.MM
-          TAG_COUNT=$(git tag -l "$YEAR_MONTH.*" | wc -l)
-          # Increment tag count by 1 (or set to 1 if no matching tags exist)
-          TAG_VERSION=$((TAG_COUNT + 1))
-          
-          # Create version name in format YY.MM.TAG.VERSION_CODE
-          VERSION_NAME="${YEAR_MONTH}.${TAG_VERSION}.${{ github.run_number }}"
-          
-          echo "year_month=$YEAR_MONTH" >> $GITHUB_OUTPUT
-          echo "tag_version=$TAG_VERSION" >> $GITHUB_OUTPUT
-          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
-          echo "Version name: $VERSION_NAME"
-
-      - name: Version Bump
-        uses: chkfung/android-version-actions@v1.2.3
-        with:
-          gradlePath: app/build.gradle.kts
-          versionCode: ${{ github.run_number }}
-          versionName: ${{ steps.version.outputs.version_name }}
 
       - name: Create GitHub Release
         id: create_release
@@ -152,4 +157,4 @@ jobs:
             - Tag version: ${{ steps.version.outputs.tag_version }}
           files: |
             ${{ steps.sign_abb.outputs.signedReleaseFile }}
-            ${{ steps.sign_app.outputs.signedReleaseFile }}
+            app/release/apk/app-release.apk
