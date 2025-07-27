@@ -72,7 +72,7 @@ jobs:
         run: ./gradlew bundleRelease
 
       - name: Copy ABB to release directory
-        run: cp app/build/outputs/bundle/release/*.aab app/release/abb/app-release.apk
+        run: cp app/build/outputs/bundle/release/*.aab app/release/abb/app-release.aab
 
       - name: Sign Android Release (ABB)
         uses: r0adkll/sign-android-release@v1
@@ -148,5 +148,5 @@ jobs:
             - Year.Month: ${{ steps.version.outputs.year_month }}
             - Tag version: ${{ steps.version.outputs.tag_version }}
           files: |
-            {{ steps.sign_abb.outputs.signedReleaseFile }}
-            {{ steps.sign_app.outputs.signedReleaseFile }}
+            ${{ steps.sign_abb.outputs.signedReleaseFile }}
+            ${{ steps.sign_app.outputs.signedReleaseFile }}
