@@ -88,8 +88,8 @@ jobs:
       - name: Build Release Application (APK)
         run: ./gradlew assembleRelease
 
-      - name: Copy AAB to release directory
-        run: cp app/build/outputs/apk/release/*.apk app/release/apk/app-release.apk
+      - name: Copy APK to release directory
+        run: cp app/build/outputs/apk/release/*.apk app/release/app-release.apk
 
       - name: Install Android Build Tools 29.0.3
         run: sdkmanager "build-tools;29.0.3"
@@ -104,10 +104,6 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
 
-      - name: Copy signed apk and abb to release directory
-        run: |
-          cp app/release/app-release-signed.apk app/release/app-firebase-release.apk
-
       - name: Debug Release Files
         run: |
           echo "SIGNED_RELEASE_FILE: ${{ env.SIGNED_RELEASE_FILE }}"
@@ -115,6 +111,10 @@ jobs:
           ls -la app/release/
           echo "Files in app directory:"
           ls -la app/
+          
+      - name: Copy signed apk and abb to release directory
+        run: |
+          cp app/release/app-release-signed.apk app/release/app-firebase-release.apk
 
       - name: Upload Artifact to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
