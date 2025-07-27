@@ -84,6 +84,9 @@ jobs:
           keyStorePassword: ${{ secrets.ANDROID_SIGNING_KEYSTORE_PASSWORD }}
           keyPassword: ${{ secrets.ANDROID_SIGNING_KEY_ALIAS_PASSWORD }}
 
+      - name: Install Android Build Tools 29.0.3
+        run: sdkmanager "build-tools;29.0.3"
+
       - name: Sign Android Release (APK)
         uses: r0adkll/sign-android-release@v1
         id: sign_app
