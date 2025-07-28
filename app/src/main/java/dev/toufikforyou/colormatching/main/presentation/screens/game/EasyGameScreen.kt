@@ -34,6 +34,7 @@ import dev.toufikforyou.colormatching.main.presentation.components.GameBackgroun
 import dev.toufikforyou.colormatching.main.presentation.components.GameExitDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameOverDialog
 import dev.toufikforyou.colormatching.main.presentation.components.GameTimeScore
+import dev.toufikforyou.colormatching.main.presentation.components.PauseOnBackground
 import dev.toufikforyou.colormatching.main.presentation.components.ResumeGameDialog
 import dev.toufikforyou.colormatching.main.presentation.viewmodels.GameViewModel
 import dev.toufikforyou.colormatching.main.utils.SoundManager
@@ -61,6 +62,11 @@ fun EasyGameScreen(
     var showInitialColors by remember { mutableStateOf(false) }
     var showExitDialog by remember { mutableStateOf(false) }
     var isTimerPaused by remember { mutableStateOf(false) }
+
+    // Pause timer when app goes to background
+    PauseOnBackground {
+        isTimerPaused = true
+    }
 
     var mutableColorBoxes by remember {
         mutableStateOf(generateColorPairs(gameState.gridSize))
