@@ -2,9 +2,9 @@ package dev.toufikforyou.colormatching.main.presentation.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 /**
  * A composable that observes the lifecycle and calls a callback when the app goes to background.

@@ -1,5 +1,5 @@
 [versions]
-agp = "7.4.2"
+agp = "8.11.1"
 datastorePreferences = "1.1.7"
 firebaseBom = "34.0.0"
 koinAndroid = "4.1.0"
