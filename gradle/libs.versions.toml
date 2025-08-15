@@ -17,7 +17,7 @@ navigationCompose = "2.9.3"
 roomRuntime = "2.7.2"
 uiTextGoogleFonts = "1.9.0"
 kspVersion = "2.2.10-2.0.2"
-plaginSerialization = "2.2.10"
+pluginSerialization = "2.2.10"
 googleService = "4.4.3"
 firebaseCrashlytics = "3.0.6"
 firebaseMessagingKtx = "24.1.2"
@@ -54,7 +54,7 @@ koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compos
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
 [plugins]
-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "plaginSerialization" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "pluginSerialization" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleService" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
