@@ -64,9 +64,11 @@ fun EasyGameScreen(
     var isTimerPaused by remember { mutableStateOf(false) }
 
     // Pause timer when app goes to background
-    PauseOnBackground {
+    PauseOnBackground(onPause = {
         isTimerPaused = true
-    }
+    }, onResume = {
+        isTimerPaused = false
+    })
 
     var mutableColorBoxes by remember {
         mutableStateOf(generateColorPairs(gameState.gridSize))

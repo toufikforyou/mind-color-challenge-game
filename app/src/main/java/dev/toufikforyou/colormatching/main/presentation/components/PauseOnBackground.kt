@@ -14,13 +14,15 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
  * @param onPause Callback that will be invoked when the ON_PAUSE lifecycle event occurs
  */
 @Composable
-fun PauseOnBackground(onPause: () -> Unit) {
+fun PauseOnBackground(onPause: () -> Unit, onResume: () -> Unit) {
     val lifecycleOwner = LocalLifecycleOwner.current
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_PAUSE) {
                 onPause()
+            }else if(event == Lifecycle.Event.ON_RESUME) {
+                onResume()
             }
         }
 
