@@ -21,7 +21,7 @@ fun PauseOnBackground(onPause: () -> Unit, onResume: () -> Unit) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_PAUSE) {
                 onPause()
-            } else if(event == Lifecycle.Event.ON_RESUME) {
+            } else if (event == Lifecycle.Event.ON_RESUME) {
                 onResume()
             }
         }

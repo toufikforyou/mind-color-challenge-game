@@ -41,12 +41,12 @@ fun AnimatedGameScore(title: String, value: String) {
     Surface(
         modifier = Modifier
             .padding(all = 8.dp)
+            .scale(animatedScale)
             .border(
                 width = 1.5.dp,
                 color = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(8.dp)
-            )
-            .scale(animatedScale),
+            ),
         shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.1f)
     ) {
