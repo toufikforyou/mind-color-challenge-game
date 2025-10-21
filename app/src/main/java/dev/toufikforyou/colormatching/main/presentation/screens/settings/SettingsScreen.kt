@@ -13,11 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,9 +25,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import dev.toufikforyou.colormatching.R
 import dev.toufikforyou.colormatching.main.presentation.components.GameAppBar
 import dev.toufikforyou.colormatching.main.presentation.components.GameBackground
 import dev.toufikforyou.colormatching.main.presentation.viewmodels.SettingsViewModel
@@ -46,9 +42,10 @@ fun SettingsScreen(
     val isSoundEnabled by viewModel.isSoundEnabled.collectAsState()
     val useSystemTheme by viewModel.useSystemTheme.collectAsState()
 
-    Scaffold(modifier = Modifier
-        .fillMaxSize()
-        .background(MaterialTheme.colorScheme.background),
+    Scaffold(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         topBar = {
             GameAppBar(title = "Settings") {
                 navController.navigateUp()
@@ -64,7 +61,7 @@ fun SettingsScreen(
         ) {
             SettingsItem(
                 title = "Use System Theme",
-                icon = if (useSystemTheme) Icons.Default.CheckCircle else Icons.Filled.CheckCircle,
+                icon = if (useSystemTheme) R.drawable.check_circle_unread_24px else R.drawable.check_circle_24px,
                 isChecked = useSystemTheme,
                 onCheckedChange = viewModel::updateUseSystemTheme
             )
@@ -72,7 +69,7 @@ fun SettingsScreen(
             if (!useSystemTheme) {
                 SettingsItem(
                     title = "Dark Mode",
-                    icon = if (isDarkMode) Icons.Default.CheckCircle else Icons.Filled.CheckCircle,
+                    icon = if (isDarkMode) R.drawable.check_circle_unread_24px else R.drawable.check_circle_24px,
                     isChecked = isDarkMode,
                     onCheckedChange = viewModel::updateDarkMode
                 )
@@ -80,7 +77,7 @@ fun SettingsScreen(
 
             SettingsItem(
                 title = "Sound Effects",
-                icon = if (isSoundEnabled) Icons.Default.Add else Icons.Default.AddCircle,
+                icon = if (isSoundEnabled) R.drawable.add_24px else R.drawable.add_circle_24px,
                 isChecked = isSoundEnabled,
                 onCheckedChange = viewModel::updateSoundEnabled
             )
@@ -88,7 +85,7 @@ fun SettingsScreen(
             SettingsItem(
                 title = "Notification Settings",
                 subtitle = "Configure daily reminder notifications",
-                icon = Icons.Default.Notifications,
+                icon = R.drawable.notification_sound_24px,
                 onClick = viewModel::openNotificationSettings
             )
         }
@@ -97,7 +94,7 @@ fun SettingsScreen(
 
 @Composable
 private fun SettingsItem(
-    title: String, subtitle: String, icon: ImageVector, onClick: () -> Unit
+    title: String, subtitle: String, icon: Int, onClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier
@@ -111,7 +108,7 @@ private fun SettingsItem(
             modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = icon,
+                painter = painterResource(id = icon),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -132,7 +129,7 @@ private fun SettingsItem(
 
 @Composable
 private fun SettingsItem(
-    title: String, icon: ImageVector, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit
+    title: String, icon: Int, isChecked: Boolean, onCheckedChange: (Boolean) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -151,7 +148,7 @@ private fun SettingsItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = icon,
+                    painter = painterResource(id = icon),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )

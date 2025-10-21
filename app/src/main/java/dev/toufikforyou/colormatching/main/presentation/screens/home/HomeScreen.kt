@@ -26,11 +26,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -49,7 +44,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
@@ -152,7 +146,7 @@ private fun MenuButtons(
     ) {
         // Start Game Button
         "Begin your color matching journey".LargeMenuButton(
-            title = "Start Game", icon = Icons.Filled.PlayArrow, onClick = {
+            title = "Start Game", icon = R.drawable.play_arrow_24px, onClick = {
                 if (isSoundEnabled) soundManager.playButtonClick()
                 navController.navigate(Screen.LevelSelection.route)
             })
@@ -167,19 +161,19 @@ private fun MenuButtons(
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             SmallMenuButton(
-                icon = Icons.Filled.MailOutline, label = "Scores", onClick = {
+                icon = R.drawable.mail_24px, label = "Scores", onClick = {
                     if (isSoundEnabled) soundManager.playButtonClick()
                     navController.navigate(Screen.HighScores.route)
                 })
 
             SmallMenuButton(
-                icon = Icons.Filled.Settings, label = "Settings", onClick = {
+                icon = R.drawable.settings_24px, label = "Settings", onClick = {
                     if (isSoundEnabled) soundManager.playButtonClick()
                     navController.navigate(Screen.Settings.route)
                 })
 
             SmallMenuButton(
-                icon = Icons.Filled.Info, label = "Guide", onClick = {
+                icon = R.drawable.info_24px, label = "Guide", onClick = {
                     if (isSoundEnabled) soundManager.playButtonClick()
                     navController.navigate(Screen.Guide.route)
                 })
@@ -190,7 +184,7 @@ private fun MenuButtons(
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 private fun String.LargeMenuButton(
-    title: String, icon: ImageVector, onClick: () -> Unit
+    title: String, icon: Int, onClick: () -> Unit
 ) {
     var isPressed by remember { mutableStateOf(false) }
     var isHovered by remember { mutableStateOf(false) }
@@ -331,7 +325,7 @@ private fun String.LargeMenuButton(
                         ), contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = icon,
+                        painter = painterResource(id = icon),
                         contentDescription = null,
                         modifier = Modifier
                             .size(32.dp)
@@ -346,7 +340,7 @@ private fun String.LargeMenuButton(
 
 @Composable
 private fun SmallMenuButton(
-    icon: ImageVector, label: String, onClick: () -> Unit
+    icon: Int, label: String, onClick: () -> Unit
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(
@@ -380,7 +374,7 @@ private fun SmallMenuButton(
             verticalArrangement = Arrangement.Center
         ) {
             Icon(
-                imageVector = icon,
+                painter = painterResource(id = icon),
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
